@@ -777,17 +777,13 @@ activeView === 'officers' ? 'All Officers' : 'Create Officer' }}
                   <option *ngFor="let z of bangaloreZones" [value]="z">{{ z }}</option>
                 </select>
               </div>
-              <span class="ad-field-hint">
-                  <i class="bi bi-info-circle"></i>
-                   Officer covers all wards in this zone by default
-              </span>
             </div>
 
             <!-- Ward — specific assignment -->
             <div class="ad-field" *ngIf="newOfficerZone">
               <label class="ad-field-label">
                 Specific Ward
-                <span class="ad-optional">(optional — more precise)</span>
+                <span class="ad-optional">(more precise)</span>
               </label>
               <div class="ad-input-wrap">
                 <i class="bi bi-geo-alt ad-input-icon"></i>

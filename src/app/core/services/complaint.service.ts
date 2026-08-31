@@ -12,6 +12,7 @@ export class ComplaintService {
   private adminUrl   = `${environment.apiUrl}/admin/complaints`;
   private fileUrl   = `${environment.apiUrl}/files`;
   private metaUrl  = `${environment.apiUrl}/meta`;
+  private baseUrl  = `${environment.apiUrl}`;
 
   constructor(private http: HttpClient) {}
 
@@ -154,18 +155,18 @@ getOfficersByCategory(category: string): Observable<any> {
 
  // public
  getPublicStats(): Observable<any> {
-   return this.http.get('/public/stats');
+   return this.http.get(`${this.baseUrl}/public/stats`);
  }
 
  getWards(): Observable<any> {
-   return this.http.get('/wards');
+   return this.http.get(`${this.baseUrl}/wards`);
  }
 
  getWardsByZone(zone: string): Observable<any> {
-   return this.http.get(`/wards/zone/${zone}`);
+   return this.http.get(`${this.baseUrl}/wards/zone/${zone}`);
  }
 
  detectWard(lat: number, lng: number): Observable<any> {
-   return this.http.get(`/wards/detect?lat=${lat}&lng=${lng}`);
+   return this.http.get(`${this.baseUrl}/wards/detect?lat=${lat}&lng=${lng}`);
  }
 }
