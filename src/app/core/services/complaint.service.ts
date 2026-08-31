@@ -7,11 +7,11 @@ import { environment } from '../../../environments/environment';
 export class ComplaintService {
 
   // Base URLs for each role
-  private citizenUrl = '${environment.apiUrl}/citizen/complaints';
-  private officerUrl = '${environment.apiUrl}/officer/complaints';
-  private adminUrl   = '${environment.apiUrl}/admin/complaints';
-  private fileUrl   = '${environment.apiUrl}/files';
-  private metaUrl  = '${environment.apiUrl}/meta';
+  private citizenUrl = `${environment.apiUrl}/citizen/complaints`;
+  private officerUrl = `${environment.apiUrl}/officer/complaints`;
+  private adminUrl   = `${environment.apiUrl}/admin/complaints`;
+  private fileUrl   = `${environment.apiUrl}/files`;
+  private metaUrl  = `${environment.apiUrl}/meta`;
 
   constructor(private http: HttpClient) {}
 
