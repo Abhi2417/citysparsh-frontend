@@ -1,0 +1,760 @@
+<div class="dashboard-layout">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar" [class.sidebar--open]="sidebarOpen">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">
+        <i class="bi bi-buildings-fill"></i>
+      </div>
+      <div class="sb-logo-info">
+        <a class="sb-logo-text" routerLink="/">CitySparsh</a>
+        <span class="sb-logo-sub">Citizen Portal</span>
+      </div>
+    </div>
+
+    <nav class="sb-nav">
+      <span class="sb-section">Menu</span>
+      <a class="sb-item" [class.active]="activeView === 'dashboard'" (click)="setView('dashboard')">
+        <i class="bi bi-grid-1x2-fill"></i> Dashboard
+      </a>
+      <a class="sb-item" [class.active]="activeView === 'list'" (click)="setView('list')">
+        <i class="bi bi-chat-left-dots-fill"></i> My Complaints
+      </a>
+      <a class="sb-item" [class.active]="activeView === 'form'" (click)="setView('form')">
+        <i class="bi bi-plus-circle-fill"></i> New Complaint
+      </a>
+    </nav>
+
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="sb-avatar">{{ getInitials() }}</div>
+        <div class="sb-user-info">
+          <span class="sb-uname">{{ username }}</span>
+          <span class="sb-urole">citizen</span>
+        </div>
+      </div>
+      <a class="sb-item logout-item" (click)="logout()">
+        <i class="bi bi-box-arrow-right"></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <div class="sidebar-backdrop" *ngIf="sidebarOpen" (click)="closeSidebar()"></div>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="sb-toggle" (click)="toggleSidebar()">   <!-- ← NEW hamburger -->
+        <i class="bi bi-list"></i>
+      </button>
+      <span class="topbar-title">
+        {{ activeView === 'dashboard' ? 'Dashboard' : activeView === 'list' ? 'My Complaints' : 'New Complaint' }}
+      </span>
+      <button class="btn-primary" (click)="setView('form')">
+        <i class="bi bi-plus-lg"></i>
+        <span class="btn-text">New Complaint</span>   <!-- ← wrapped for icon-only mobile -->
+      </button>
+    </header>
+
+    <!-- ─── DASHBOARD VIEW ─── -->
+    <div class="content" *ngIf="activeView === 'dashboard'">
+
+      <div class="welcome-banner">
+        <div class="welcome-text">
+          <p class="welcome-label">Welcome back</p>
+          <h2 class="welcome-name">{{ username }}</h2>
+          <span class="welcome-sub">Track your complaints and check status updates below.</span>
+        </div>
+        <button class="welcome-action" (click)="setView('form')">
+          <i class="bi bi-plus-lg"></i> File a complaint
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon si-blue">
+            <i class="bi bi-chat-left-dots-fill"></i>
+          </div>
+          <div>
+            <div class="stat-val">{{ complaints.length }}</div>
+            <div class="stat-lbl">Total</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-amber">
+            <i class="bi bi-clock-fill"></i>
+          </div>
+          <div>
+            <div class="stat-val">{{ countByStatus('PENDING') }}</div>
+            <div class="stat-lbl">Pending</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-indigo">
+            <i class="bi bi-arrow-repeat"></i>
+          </div>
+          <div>
+            <div class="stat-val">{{ countByStatus('IN_PROGRESS') }}</div>
+            <div class="stat-lbl">In Progress</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-green">
+            <i class="bi bi-check-circle-fill"></i>
+          </div>
+          <div>
+            <div class="stat-val">{{ countByStatus('RESOLVED') }}</div>
+            <div class="stat-lbl">Resolved</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent complaints -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Recent Complaints</span>
+          <span class="link" (click)="setView('list')">
+            View all <i class="bi bi-arrow-right"></i>
+          </span>
+        </div>
+
+        <!-- ── LOADING STATE (mirrors officer's od-loading) ── -->
+        <div *ngIf="isLoading" class="loading-row">
+          <div class="spinner-border spinner-border-sm text-primary"></div>
+          <span>Loading complaints…</span>
+        </div>
+
+        <!-- ── EMPTY STATE ── -->
+        <div *ngIf="!isLoading && recentComplaints.length === 0" class="empty-state">
+          <i class="bi bi-chat-left-dots empty-state-icon"></i>
+          <p class="empty-state-title">No complaints yet</p>
+          <p class="empty-state-sub">
+            <span class="link" (click)="setView('form')">File one now <i class="bi bi-arrow-right"></i></span>
+          </p>
+        </div>
+
+        <!-- ── TABLE — only renders after data arrives ── -->
+        <div
+          class="complaint-cards"
+          *ngIf="!isLoading && recentComplaints.length > 0"
+        >
+          <div
+            class="complaint-card"
+            *ngFor="let c of recentComplaints"
+            (click)="setView('list')"
+          >
+
+            <!-- Attachment / Image -->
+            <div class="complaint-card-img" *ngIf="c.attachmentName">
+              <img
+                [src]="fileUrl + '/' + getFileNameFromPath(c.attachmentPath)"
+                [alt]="c.attachmentName"
+                (error)="onImgError($event)"
+              />
+            </div>
+
+            <!-- Placeholder when no attachment -->
+            <div
+              class="complaint-card-img complaint-card-img--placeholder"
+              *ngIf="!c.attachmentName"
+            >
+              <i class="bi bi-file-earmark-text"></i>
+            </div>
+
+            <!-- Card Body -->
+            <div class="complaint-card-body">
+
+              <!-- ID + Status -->
+              <div class="complaint-card-top">
+        <span class="complaint-id">
+          #{{ c.id }}
+        </span>
+
+                <span
+                  class="badge"
+                  [ngClass]="getStatusClass(c.status)"
+                >
+          {{ formatStatus(c.status) }}
+        </span>
+              </div>
+
+              <!-- Title -->
+              <div class="complaint-card-title">
+                {{ c.title }}
+              </div>
+
+              <!-- Description -->
+              <div class="complaint-card-desc">
+                {{ c.description }}
+              </div>
+
+              <!-- Priority + Attachment + Category-->
+              <div class="complaint-card-meta">
+          <span
+          class="badge"
+          [ngClass]="getPriorityClass(c.priority)">
+          {{ c.priority }}
+         </span>
+                <span class="category-pill" *ngIf="c.category">
+                  <i class="bi {{ getCategoryIcon(c.category) }}"></i>
+                {{ formatCategory(c.category) }}
+             </span>
+
+              </div>
+
+              <!-- Officer -->
+              <div class="complaint-card-officer">
+
+                <div class="complaint-officer-info">
+                  <i class="bi bi-shield-check"></i>
+
+                  <span *ngIf="c.assignedOfficerName">
+                  {{ c.assignedOfficerName }}
+                 </span>
+
+                  <span *ngIf="!c.assignedOfficerName" class="unassigned">
+                     Not assigned
+                </span>
+                </div>
+
+                <span class="complaint-card-date">
+                 {{ c.updatedAt | date:'dd MMM yyyy' }}
+                 </span>
+
+              </div>
+
+              <!-- View -->
+              <div class="complaint-card-footer">
+                <span>View complaint</span>
+                <i class="bi bi-arrow-right"></i>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── MY COMPLAINTS VIEW ─── -->
+    <div class="content" *ngIf="activeView === 'list'">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">My Complaints</span>
+          <button class="btn-primary btn-sm" (click)="setView('form')">
+            <i class="bi bi-plus-lg"></i> New
+          </button>
+        </div>
+
+        <!-- ── FILTER BAR ── -->
+        <div class="list-filter-bar" *ngIf="!isLoading && complaints.length > 0">
+          <!-- Search -->
+          <div class="list-search-wrap">
+            <i class="bi bi-search list-search-icon"></i>
+            <input class="list-search-input" type="text"
+                   [(ngModel)]="listSearch"
+                   placeholder="Search by title…">
+            <button *ngIf="listSearch" class="list-search-clear"
+                    (click)="listSearch = ''">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <!-- Category filter -->
+          <div class="list-filter-tabs">
+            <button class="list-filter-tab"
+                    [class.active]="listCategoryFilter === ''"
+                    (click)="listCategoryFilter = ''">
+              All
+            </button>
+            <button class="list-filter-tab"
+                    *ngFor="let cat of categories"
+                    [class.active]="listCategoryFilter === cat.value"
+                    (click)="listCategoryFilter = cat.value">
+              <i class="bi {{ getCategoryIcon(cat.value) }}"></i>
+              {{ cat.label }}
+            </button>
+          </div>
+
+          <!-- Result count -->
+          <span class="list-count">
+    {{ filteredComplaints.length }} complaint{{ filteredComplaints.length !== 1 ? 's' : '' }}
+  </span>
+        </div>
+
+        <!-- ── LOADING STATE ── -->
+        <div *ngIf="isLoading" class="loading-row">
+          <div class="spinner-border spinner-border-sm text-primary"></div>
+          <span>Loading complaints…</span>
+        </div>
+
+        <!-- ── EMPTY STATE ── -->
+        <div *ngIf="!isLoading && complaints.length === 0" class="empty-state">
+          <i class="bi bi-chat-left-dots empty-state-icon"></i>
+          <p class="empty-state-title">No complaints found</p>
+          <p class="empty-state-sub">
+            <span class="link" (click)="setView('form')">File one now <i class="bi bi-arrow-right"></i></span>
+          </p>
+        </div>
+
+        <!-- ── TABLE ── -->
+        <div class="table-wrap" *ngIf="!isLoading && complaints.length > 0">
+          <table>
+            <thead>
+            <tr>
+              <th>#ID</th>
+              <th>Title</th>
+              <th>Priority</th>
+              <th>Category</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Assigned Officer</th>
+              <th>Updated Date</th>
+              <th>Attachment</th>
+              <th>Resolution Comment</th>
+              <th>Manage</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let c of filteredComplaints; let i = index">
+              <td class="id-cell">#{{ c.id }}</td>
+              <td>
+                <div class="complaint-title">{{ c.title }}</div>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getPriorityClass(c.priority)">{{ c.priority }}</span>
+              </td>
+              <td>
+                 <span style="font-size:12px;color:#64748b">
+                   <i class="bi {{ getCategoryIcon(c.category) }}"></i>
+                     {{ formatCategory(c.category) }}
+                 </span>
+              </td>
+              <!-- in tbody -->
+              <td class="ad-muted ad-location-cell">
+                <ng-container *ngIf="c.address; else noLocation">
+
+                  <a
+                    *ngIf="c.latitude != null && c.longitude != null"
+                    [href]="'https://www.google.com/maps/search/?api=1&query=' + c.latitude + ',' + c.longitude"
+                    target="_blank"
+                    class="ad-location-link"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <div class="ad-location-address" [title]="c.address">
+                      <i class="bi bi-geo-alt"></i>
+                      {{ c.address }}
+                    </div>
+                  </a>
+
+                  <div *ngIf="c.latitude == null || c.longitude == null">
+                    <div class="ad-location-address" [title]="c.address">
+                      <i class="bi bi-geo-alt"></i>
+                      {{ c.address }}
+                    </div>
+                  </div>
+
+                </ng-container>
+
+                <ng-template #noLocation>
+                  <span>—</span>
+                </ng-template>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getStatusClass(c.status)">{{ formatStatus(c.status) }}</span>
+              </td>
+              <td>
+                <div class="complaint-title">{{ c.assignedOfficerName }}</div>
+              </td>
+              <td class="date-cell">{{ c.updatedAt | date:'dd MMM yyyy' }}</td>
+              <td>
+                <!-- Attachment link -->
+                <a *ngIf="c.attachmentName"
+                   [href]="fileUrl + '/' + getFileNameFromPath(c.attachmentPath)"
+                   target="_blank"
+                   class="attachment-link"
+                   (click)="$event.stopPropagation()">
+                  <i class="bi bi-paperclip"></i> {{ c.attachmentName }}
+                </a>
+              </td>
+              <td>
+                <div class="complaint-title">{{ c.resolutionComment || '—' }}</div>
+              </td>
+              <td>
+                <div style="display:flex;gap:6px">
+                  <button class="icon-btn edit-btn"
+                          (click)="viewComplaintDetail(c)"
+                          title="Edit"
+                          [disabled]="c.status === 'RESOLVED' || c.status === 'REJECTED'">
+                    <i class="bi bi-pencil-fill"></i>
+                  </button>
+                  <button class="icon-btn delete-btn"
+                          (click)="deleteComplaint(c.id, i)"
+                          title="Delete">
+                    <i class="bi bi-trash3-fill"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─── NEW COMPLAINT FORM VIEW ─── -->
+    <div class="content" *ngIf="activeView === 'form'">
+
+      <!-- Success state -->
+      <div class="success-banner" *ngIf="submitSuccess">
+        <i class="bi bi-check-circle-fill"></i>
+        <div>
+          <strong>Complaint submitted successfully!</strong>
+          <p>Redirecting to your complaints...</p>
+        </div>
+      </div>
+
+      <div class="card form-card" *ngIf="!submitSuccess">
+        <div class="card-head">
+          <span class="card-title">File a New Complaint</span>
+        </div>
+        <div class="form-body">
+
+          <!-- Title -->
+          <div class="form-group" [class.has-error]="submitted && !form.title.trim()">
+            <label>Title <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="form.title" placeholder="Brief title of the issue" />
+            <span class="error-msg" *ngIf="submitted && !form.title.trim()">Title is required</span>
+          </div>
+
+          <!-- Description -->
+          <div class="form-group" [class.has-error]="submitted && !form.description.trim()">
+            <label>Description <span class="required">*</span></label>
+            <textarea [(ngModel)]="form.description" rows="4" placeholder="Describe the issue in detail..."></textarea>
+            <span class="error-msg" *ngIf="submitted && !form.description.trim()">Description is required</span>
+          </div>
+
+          <!-- Priority -->
+          <div class="form-group" [class.has-error]="submitted && !form.priority">
+            <label>Priority <span class="required">*</span></label>
+            <select [(ngModel)]="form.priority">
+              <option *ngFor="let p of priorities" [value]="p.value">{{ p.label }}</option>
+            </select>
+            <span class="error-msg" *ngIf="submitted && !form.priority">Priority is required</span>
+          </div>
+
+          <!-- Category -->
+          <div class="form-group" [class.has-error]="submitted && !form.category">
+            <label>
+              Category <span class="required">*</span>
+            </label>
+
+            <!-- Visual category picker -->
+            <div class="category-grid">
+              <button
+                type="button"
+                *ngFor="let cat of categories"
+                class="category-btn"
+                [class.selected]="form.category === cat.value"
+                (click)="form.category = cat.value"
+              >
+                <i class="bi {{ getCategoryIcon(cat.value) }}"></i>
+                <span>{{ cat.label }}</span>
+              </button>
+            </div>
+
+            <span class="error-msg" *ngIf="submitted && !form.category">
+             Please select a category
+            </span>
+          </div>
+
+
+          <!-- Location -->
+          <div class="form-group" [class.has-error]="submitted && !form.address.trim()">
+            <label>
+              Location <span class="required">*</span>
+            </label>
+
+            <!-- Search box -->
+            <div class="location-search-wrap">
+              <i class="bi bi-search location-search-icon"></i>
+              <input
+                class="location-search-input"
+                type="text"
+                [(ngModel)]="locationQuery"
+                name="locationQuery"
+                placeholder="Search address…"
+                (keydown.enter)="searchLocation(); $event.preventDefault()"
+              />
+              <button class="location-search-btn" type="button" (click)="searchLocation()">
+                Search
+              </button>
+            </div>
+
+            <!-- Current location button -->
+            <button type="button" class="location-detect-btn" (click)="detectLocation()">
+              <i class="bi bi-geo-alt-fill"></i>
+              {{ detectingLocation ? 'Detecting…' : 'Use my current location' }}
+            </button>
+
+            <!-- Map -->
+            <div id="complaint-map" class="location-map"></div>
+
+            <!-- Selected address display -->
+            <div class="location-selected" *ngIf="form.address">
+              <i class="bi bi-pin-map-fill"></i>
+              <span>{{ form.address }}</span>
+              <button type="button" class="location-clear" (click)="clearLocation()">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+
+            <span class="error-msg" *ngIf="submitted && !form.address.trim()">
+              Location is required
+            </span>
+          </div>
+
+          <!-- Ward detected -->
+          <div class="ward-detected" *ngIf="detectedWard">
+            <div class="ward-detected-left">
+              <i class="bi bi-patch-check-fill"></i>
+              <div>
+                <span class="ward-detected-label">Ward detected</span>
+                <span class="ward-detected-name">
+                     {{ detectedWard }}
+                <span class="ward-zone-tag">{{ detectedZone }}</span>
+               </span>
+              </div>
+            </div>
+            <span class="ward-auto-tag">
+             <i class="bi bi-robot"></i> Officer will be auto-assigned
+            </span>
+          </div>
+
+          <!-- Ward not in DB -->
+          <div class="ward-unknown" *ngIf="form.latitude && !detectedWard">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>
+              Ward not detected for this location.
+              Admin will assign an officer manually.
+            </span>
+          </div>
+
+          <!-- File upload -->
+          <div class="form-group">
+            <label>Attachment <span class="optional">(optional)</span></label>
+            <div
+              class="drop-zone"
+              [class.dragging]="isDragging"
+              [class.has-file]="form.fileName"
+              (dragover)="onDragOver($event)"
+              (dragleave)="onDragLeave($event)"
+              (drop)="onDrop($event)"
+              (click)="fileInput.click()"
+            >
+              <input #fileInput type="file" hidden (change)="onFileChange($event)" />
+
+              <ng-container *ngIf="!form.fileName">
+                <i class="bi bi-cloud-upload-fill drop-icon"></i>
+                <span class="drop-text">Drag & drop or <u>browse</u></span>
+                <span class="drop-sub">Images, PDFs up to 10MB</span>
+              </ng-container>
+
+              <ng-container *ngIf="form.fileName">
+                <i class="bi bi-file-earmark-check-fill drop-icon file-ready"></i>
+                <span class="drop-text file-name">{{ form.fileName }}</span>
+                <button class="remove-file" (click)="removeFile($event)">
+                  <i class="bi bi-x-lg"></i> Remove
+                </button>
+              </ng-container>
+            </div>
+          </div>
+
+          <!-- Global error -->
+          <div class="form-error-global" *ngIf="submitError">
+            <i class="bi bi-exclamation-circle-fill"></i> {{ submitError }}
+          </div>
+
+          <!-- Actions -->
+          <div class="form-actions">
+            <button class="btn-secondary" (click)="setView('dashboard')" [disabled]="isSubmitting">
+              Cancel
+            </button>
+            <button class="btn-primary" (click)="submitComplaint()" [disabled]="isSubmitting">
+              <i class="bi bi-send-fill" *ngIf="!isSubmitting"></i>
+              <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm"></span>
+              {{ isSubmitting ? 'Submitting...' : 'Submit Complaint' }}
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── DETAIL / UPDATE VIEW ─── -->
+    <div class="content" *ngIf="activeView === 'detail' && selectedComplaint">
+
+      <!-- Back button -->
+      <button class="btn-secondary" style="margin-bottom:16px" (click)="setView('list')">
+        <i class="bi bi-arrow-left"></i> Back to complaints
+      </button>
+
+      <!-- Success -->
+      <div class="success-banner" *ngIf="updateSuccess">
+        <i class="bi bi-check-circle-fill"></i>
+        <div>
+          <strong>Complaint updated successfully!</strong>
+          <p>Redirecting to your complaints…</p>
+        </div>
+      </div>
+
+      <div class="card form-card" *ngIf="!updateSuccess">
+        <div class="card-head">
+      <span class="card-title">
+        <i class="bi bi-pencil-fill" style="color:#1a56db"></i>
+        Edit Complaint #{{ selectedComplaint.id }}
+      </span>
+          <span class="badge" [ngClass]="getStatusClass(selectedComplaint.status)">
+        {{ formatStatus(selectedComplaint.status) }}
+      </span>
+        </div>
+
+        <div class="form-body">
+
+          <!-- Title -->
+          <div class="form-group">
+            <label>Title <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="updateForm.title" placeholder="Brief title of the issue" />
+          </div>
+
+          <!-- Description -->
+          <div class="form-group">
+            <label>Description <span class="required">*</span></label>
+            <textarea [(ngModel)]="updateForm.description" rows="4"></textarea>
+          </div>
+
+          <!-- Priority -->
+          <div class="form-group">
+            <label>Priority <span class="required">*</span></label>
+            <select [(ngModel)]="updateForm.priority">
+              <option *ngFor="let p of priorities" [value]="p.value">{{ p.label }}</option>
+            </select>
+          </div>
+
+          <!-- Category -->
+          <div class="form-group">
+            <label>Category <span class="required">*</span></label>
+            <div class="category-grid">
+              <button
+                type="button"
+                *ngFor="let cat of categories"
+                class="category-btn"
+                [class.selected]="updateForm.category === cat.value"
+                (click)="updateForm.category = cat.value"
+              >
+                <i class="bi {{ getCategoryIcon(cat.value) }}"></i>
+                <span>{{ cat.label }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Location -->
+          <div class="form-group">
+            <label>Location</label>
+
+            <!-- Search -->
+            <div class="location-search-wrap">
+              <i class="bi bi-search location-search-icon"></i>
+              <input class="location-search-input" type="text"
+                     [(ngModel)]="updateLocationQuery"
+                     name="updateLocationQuery"
+                     placeholder="Search address…"
+                     (keydown.enter)="searchUpdateLocation(); $event.preventDefault()">
+              <button class="location-search-btn" type="button" (click)="searchUpdateLocation()">
+                Search
+              </button>
+            </div>
+
+            <!-- Detect -->
+            <button type="button" class="location-detect-btn" (click)="detectUpdateLocation()">
+              <i class="bi bi-geo-alt-fill"></i>
+              {{ detectingUpdateLocation ? 'Detecting…' : 'Use my current location' }}
+            </button>
+
+            <!-- Map -->
+            <div id="update-complaint-map" class="location-map"></div>
+
+            <!-- Ward detected — ADD THIS -->
+            <div class="ward-detected" *ngIf="updateDetectedWard">
+              <div class="ward-detected-left">
+                <i class="bi bi-patch-check-fill"></i>
+                <div>
+                  <span class="ward-detected-label">Ward detected</span>
+                  <span class="ward-detected-name">
+                    {{ updateDetectedWard }}
+                  <span class="ward-zone-tag">{{ updateDetectedZone }}</span>
+                 </span>
+                </div>
+              </div>
+              <span class="ward-auto-tag">
+              <i class="bi bi-robot"></i> Officer will be auto-assigned
+             </span>
+            </div>
+
+            <!-- Ward not detected -->
+            <div class="ward-unknown" *ngIf="updateForm.latitude && !updateDetectedWard">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              <span>Ward not detected — admin will assign officer manually.</span>
+            </div>
+
+            <!-- Selected address -->
+            <div class="location-selected" *ngIf="updateForm.address">
+              <i class="bi bi-pin-map-fill"></i>
+              <span>{{ updateForm.address }}</span>
+              <button type="button" class="location-clear" (click)="clearUpdateLocation()">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Read-only info -->
+          <div class="form-group">
+            <label>Assigned Officer</label>
+            <div style="padding:10px 13px;background:#f8f9fc;border-radius:9px;font-size:13px;color:#64748b">
+              {{ selectedComplaint.assignedOfficerName || 'Not assigned yet' }}
+            </div>
+          </div>
+
+          <div class="form-group" *ngIf="selectedComplaint.resolutionComment">
+            <label>Resolution Comment</label>
+            <div style="padding:10px 13px;background:#f0fdf4;border:1px solid #86efac;border-radius:9px;font-size:13px;color:#166534">
+              {{ selectedComplaint.resolutionComment }}
+            </div>
+          </div>
+
+          <!-- Error -->
+          <div class="form-error-global" *ngIf="updateError">
+            <i class="bi bi-exclamation-circle-fill"></i> {{ updateError }}
+          </div>
+
+          <!-- Actions -->
+          <div class="form-actions">
+            <button class="btn-secondary" (click)="setView('list')" [disabled]="isUpdating">
+              Cancel
+            </button>
+            <button class="btn-primary" (click)="updateComplaint()" [disabled]="isUpdating">
+              <span *ngIf="isUpdating" class="spinner-border spinner-border-sm"></span>
+              <i class="bi bi-floppy-fill" *ngIf="!isUpdating"></i>
+              {{ isUpdating ? 'Saving…' : 'Save Changes' }}
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

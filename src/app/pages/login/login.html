@@ -1,0 +1,217 @@
+<app-toast></app-toast>
+
+<div class="lp">
+
+  <!-- ═══ LEFT PANEL ═══ -->
+  <div class="lp-left">
+    <div class="lp-blob lp-blob--tr"></div>
+    <div class="lp-blob lp-blob--bl"></div>
+
+    <!-- Brand -->
+    <div class="lp-brand">
+      <div class="lp-brand-icon">
+        <i class="bi bi-buildings-fill"></i>
+      </div>
+      <a class="lp-brand-name" routerLink="/">CitySparsh</a>
+    </div>
+
+    <!-- Hero -->
+    <div class="lp-hero">
+      <p class="lp-eyebrow">
+        <i class="bi bi-geo-alt-fill"></i> Civic Portal
+      </p>
+      <h1 class="lp-title">
+        Welcome <em>back</em> to<br>your community.
+      </h1>
+      <p class="lp-subtitle">
+        Sign in to track your complaints, manage cases,
+        or oversee the entire system.
+      </p>
+
+      <!-- Stat cards -->
+      <div class="lp-stats">
+        <div class="lp-stat">
+          <span *ngIf="!loadingStats" class="lp-stat-val">{{ formatStat(stats.totalResolved) }}</span>
+          <span *ngIf="loadingStats"></span>
+          <div class="lp-stat-lbl">Total Resolved</div>
+        </div>
+        <div class="lp-stat">
+          <span *ngIf="!loadingStats" class="lp-stat-val">{{ formatStat(stats.totalCitizens) }}</span>
+          <span *ngIf="loadingStats" class="lp-stat-lbl"></span>
+          <div class="lp-stat-lbl">Total Citizen</div>
+        </div>
+        <div class="lp-stat">
+          <span *ngIf="!loadingStats" class="lp-stat-val">{{ formatStat(stats.activeOfficers) }}</span>
+          <span *ngIf="loadingStats"></span>
+          <div class="lp-stat-lbl">Field officers active</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="lp-footer">© 2025 CitySparsh · Civic Complaint Portal</p>
+  </div>
+
+  <!-- ═══ RIGHT PANEL ═══ -->
+  <div class="lp-right">
+    <div class="lp-form-wrap">
+
+      <!-- Header -->
+      <div class="lp-header">
+        <div class="lp-tag">
+          <i class="bi bi-lock-fill"></i> Secure sign in
+        </div>
+        <h2 class="lp-form-title">Sign in to your account</h2>
+        <p class="lp-form-sub">
+          New here?
+          <a routerLink="/register">Create a free account</a>
+        </p>
+      </div>
+
+      <!-- Role tabs -->
+      <p class="lp-role-lbl">Sign in as</p>
+      <div class="lp-role-tabs">
+        <button
+          *ngFor="let r of roles"
+          type="button"
+          class="lp-role-tab"
+          [class.lp-role-tab--active]="activeRole === r.key"
+          (click)="setRole(r.key)"
+        >
+          <i class="bi {{ r.icon }}"></i>
+          <span>{{ r.label }}</span>
+        </button>
+      </div>
+
+      <!-- Form -->
+      <form (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- Email -->
+        <div class="lp-field">
+          <label class="lp-label" for="loginEmail">Email address</label>
+          <div class="lp-input-wrap" [class.lp-input-wrap--err]="emailInvalid">
+            <i class="bi bi-envelope lp-icon"></i>
+            <input
+              id="loginEmail"
+              type="email"
+              class="lp-input"
+              [(ngModel)]="email"
+              name="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+            >
+          </div>
+          <span class="lp-err" *ngIf="emailInvalid">Enter a valid email address</span>
+        </div>
+
+        <!-- Password -->
+        <div class="lp-field">
+          <label class="lp-label" for="loginPassword">
+            Password
+            <a class="lp-forgot" (click)="openForgotModal()">Forgot password?</a>
+          </label>
+          <div class="lp-input-wrap" [class.lp-input-wrap--err]="passwordInvalid">
+            <i class="bi bi-lock lp-icon"></i>
+            <input
+              id="loginPassword"
+              [type]="showPassword ? 'text' : 'password'"
+              class="lp-input lp-input--pr"
+              [(ngModel)]="password"
+              name="password"
+              placeholder="Your password"
+              autocomplete="current-password"
+            >
+            <button
+              type="button"
+              class="lp-eye"
+              (click)="showPassword = !showPassword"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+            >
+              <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword"></i>
+            </button>
+          </div>
+          <span class="lp-err" *ngIf="passwordInvalid">Password is required</span>
+        </div>
+
+        <!-- Forgot Password Modal -->
+        <div class="lp-modal-backdrop" *ngIf="showForgotModal" (click)="closeForgotModal()">
+          <div class="lp-modal" (click)="$event.stopPropagation()">
+
+            <!-- Success state -->
+            <div class="lp-modal-success" *ngIf="forgotSuccess">
+              <div class="lp-modal-success-icon">
+                <i class="bi bi-envelope-check-fill"></i>
+              </div>
+              <h3 class="lp-modal-success-title">Check your inbox</h3>
+              <p class="lp-modal-success-sub">
+                If <strong>{{ forgotEmail }}</strong> is registered, you'll receive
+                a reset link shortly. Check your spam folder too.
+              </p>
+              <button type="button" class="lp-modal-btn" (click)="closeForgotModal()">Back to login</button>
+            </div>
+
+            <!-- Form state -->
+            <ng-container *ngIf="!forgotSuccess">
+              <div class="lp-modal-header">
+                <div class="lp-modal-icon">
+                  <i class="bi bi-key-fill"></i>
+                </div>
+                <button class="lp-modal-close" (click)="closeForgotModal()">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+
+              <h3 class="lp-modal-title">Forgot your password?</h3>
+              <p class="lp-modal-sub">
+                Enter your email address and we'll send you a link to reset your password.
+              </p>
+
+              <div class="lp-field" [class.lp-field--err]="forgotSubmitted && !forgotEmail.includes('@')">
+                <label class="lp-label">Email address</label>
+                <div class="lp-input-wrap">
+                  <i class="bi bi-envelope lp-icon"></i>
+                  <input class="lp-input" type="email"
+                         [(ngModel)]="forgotEmail"
+                         name="forgotEmail"
+                         placeholder="your@email.com"
+                         (keydown.enter)="submitForgotPassword()">
+                </div>
+              </div>
+
+              <button type="button" class="lp-modal-btn" (click)="submitForgotPassword()" [disabled]="forgotLoading">
+                <span *ngIf="forgotLoading" class="spinner-border spinner-border-sm"></span>
+                <ng-container *ngIf="!forgotLoading">
+                  <i class="bi bi-send-fill"></i> Send reset link
+                </ng-container>
+                <ng-container *ngIf="forgotLoading">Sending…</ng-container>
+              </button>
+            </ng-container>
+
+          </div>
+        </div>
+
+        <!-- Remember me -->
+        <label class="lp-remember" (click)="rememberMe = !rememberMe">
+          <span class="lp-check" [class.lp-check--on]="rememberMe">
+            <svg *ngIf="rememberMe" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" width="10" height="10">
+              <path d="M2 6L5 9L10 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="lp-remember-txt">Remember me for 30 days</span>
+        </label>
+
+        <!-- Submit -->
+        <button type="submit" class="lp-submit" [disabled]="loading">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm"></span>
+          <ng-container *ngIf="!loading">
+            <i class="bi bi-box-arrow-in-right"></i>
+            Sign in
+          </ng-container>
+          <ng-container *ngIf="loading">Signing in…</ng-container>
+        </button>
+
+      </form>
+
+    </div>
+  </div>
+
+</div>

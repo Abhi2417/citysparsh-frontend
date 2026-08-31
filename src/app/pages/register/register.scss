@@ -1,0 +1,467 @@
+// ═══════════════════════════════════════════════
+//  CitySparsh — Register Page
+//  All classes namespaced with reg- prefix
+// ═══════════════════════════════════════════════
+
+:host {
+  display: block;
+  min-height: 100vh;
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
+// ── Layout ──────────────────────────────────────
+.reg-page {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ── Left Panel ───────────────────────────────────
+.reg-left {
+  background: #0C1929;
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+
+  // Decorative blobs
+  &::before {
+    content: '';
+    position: absolute;
+    width: 360px;
+    height: 360px;
+    border-radius: 50%;
+    background: rgba(55, 138, 221, 0.07);
+    top: -100px;
+    right: -100px;
+    pointer-events: none;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    background: rgba(29, 158, 117, 0.06);
+    bottom: -60px;
+    left: -60px;
+    pointer-events: none;
+  }
+
+  @media (max-width: 900px) {
+    display: none;
+  }
+}
+
+.reg-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.reg-brand-icon {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 0.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 18px;
+}
+
+.reg-brand-name {
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.2px;
+}
+
+.reg-hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 0 28px;
+  position: relative;
+  z-index: 1;
+}
+
+.reg-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #378ADD;
+  margin-bottom: 16px;
+}
+
+.reg-hero-title {
+  font-size: 36px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.15;
+  letter-spacing: -0.6px;
+  margin-bottom: 16px;
+
+  em {
+    color: #1D9E75;
+    font-style: normal;
+  }
+}
+
+.reg-hero-sub {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.42);
+  line-height: 1.75;
+  max-width: 300px;
+  margin-bottom: 36px;
+}
+
+// Steps
+.reg-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.reg-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+
+  strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 2px;
+  }
+
+  > div:last-child {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.38);
+    line-height: 1.55;
+  }
+}
+
+.reg-step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 0.5px solid rgba(255, 255, 255, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.reg-left-footer {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.18);
+  position: relative;
+  z-index: 1;
+}
+
+// ── Right Panel ───────────────────────────────────
+.reg-right {
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 32px;
+
+
+}
+
+.reg-form-wrap {
+  width: 100%;
+  max-width: 420px;
+}
+
+// Form header
+.reg-form-header {
+  margin-bottom: 28px;
+}
+
+.reg-form-tag {
+ display: inline-flex;
+   align-items: center;
+   gap: 6px;
+   padding: 4px 12px;
+   background: #f1f5f9;
+   border: 1px solid #e2e8f0;
+   border-radius: 20px;
+   font-size: 11px;
+   font-weight: 500;
+   color: #64748b;
+   margin-bottom: 14px;
+
+   i { font-size: 12px;  }
+
+
+}
+
+.reg-form-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #0f172a;
+  letter-spacing: -0.3px;
+  margin-bottom: 6px;
+
+
+}
+
+.reg-form-sub {
+  font-size: 13px;
+  color: #64748b;
+
+  a {
+    color: #1a56db;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover { text-decoration: underline; }
+  }
+}
+
+// ── Field Grid ────────────────────────────────────
+.reg-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.reg-field {
+  margin-bottom: 16px;
+}
+
+.reg-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 6px;
+
+
+}
+
+.reg-strength-label {
+  font-size: 11px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+// ── Input ─────────────────────────────────────────
+.reg-input-wrap {
+  position: relative;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 9px;
+  background: #ffffff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:focus-within {
+    border-color: #1a56db;
+    box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
+  }
+
+  &.error {
+    border-color: #ef4444;
+
+    &:focus-within {
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+  }
+
+}
+
+.reg-input {
+  width: 100%;
+  height: 42px;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #0f172a;
+  border-radius: 9px;
+
+  &::placeholder { color: #cbd5e1; }
+
+
+}
+
+.reg-input-icon-wrap { }
+
+.reg-input-icon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.reg-input-padded        { padding-left: 38px; }
+.reg-input-padded-right  { padding-right: 44px; }
+
+.reg-eye-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #94a3b8;
+  font-size: 16px;
+  line-height: 1;
+  border-radius: 5px;
+  transition: color 0.15s;
+
+  &:hover { color: #475569; }
+}
+
+// ── Password strength bar ─────────────────────────
+.reg-strength-bar {
+  display: flex;
+  gap: 4px;
+  margin-top: 7px;
+}
+
+.reg-strength-seg {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: #e2e8f0;
+  transition: background 0.25s;
+
+  @media (prefers-color-scheme: dark) {
+    background: #334155;
+  }
+}
+
+.reg-hint {
+  display: block;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
+.reg-error-msg {
+  display: block;
+  font-size: 11px;
+  color: #ef4444;
+  margin-top: 4px;
+}
+
+// ── Role note ─────────────────────────────────────
+.reg-role-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 11px 14px;
+  background: #f0f9ff;
+  border: 0.5px solid #bae6fd;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #0c4a6e;
+  line-height: 1.55;
+  margin-bottom: 20px;
+
+  i {
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #0284c7;
+  }
+
+  strong { font-weight: 600; }
+
+  @media (prefers-color-scheme: dark) {
+    background: #0c1a2e;
+    border-color: #1e3a5f;
+    color: #7dd3fc;
+    i { color: #38bdf8; }
+  }
+}
+
+// ── Submit button ─────────────────────────────────
+.reg-submit-btn {
+  width: 100%;
+  height: 44px;
+  background: #1a56db;
+  border: none;
+  border-radius: 9px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+  letter-spacing: 0.01em;
+
+  i { font-size: 16px; }
+
+  &:hover:not(:disabled) {
+    background: #1240a8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(26, 86, 219, 0.3);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+}
+
+// ── Terms ─────────────────────────────────────────
+.reg-terms {
+  font-size: 11px;
+  color: #94a3b8;
+  text-align: center;
+  margin-top: 14px;
+  line-height: 1.7;
+
+  a {
+    color: #64748b;
+    text-decoration: underline;
+    text-decoration-color: #cbd5e1;
+
+    &:hover { color: #1a56db; text-decoration-color: #1a56db; }
+  }
+}

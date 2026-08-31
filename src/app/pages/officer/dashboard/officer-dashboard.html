@@ -1,0 +1,554 @@
+<app-toast></app-toast>
+
+<div class="od-layout">
+  <aside class="od-sidebar" [class.od-sidebar--open]="sidebarOpen">
+
+    <!-- Logo -->
+    <div class="od-sb-logo">
+      <div class="od-sb-logo-icon">
+        <i class="bi bi-buildings-fill"></i>
+      </div>
+      <div class="od-sb-logo-info">
+        <a class="od-sb-logo-text" routerLink="/">CitySparsh</a>
+        <span class="od-sb-logo-sub">Officer Portal</span>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="od-sb-nav">
+      <span class="od-sb-section">Menu</span>
+
+      <a class="od-sb-item" [class.active]="activeView === 'dashboard'" (click)="setView('dashboard')">
+        <i class="bi bi-grid-1x2-fill"></i> Dashboard
+      </a>
+
+      <a class="od-sb-item" [class.active]="activeView === 'cases'" (click)="setView('cases')">
+        <i class="bi bi-clipboard-check-fill"></i> Assigned Cases
+        <span class="od-sb-count" *ngIf="total > 0">{{ total }}</span>
+      </a>
+
+      <div class="od-sb-urgent" *ngIf="urgentCount > 0">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span>{{ urgentCount }} urgent case{{ urgentCount !== 1 ? 's' : '' }}</span>
+      </div>
+    </nav>
+
+    <!-- Footer -->
+    <div class="od-sb-footer">
+      <div class="od-sb-user">
+        <div class="od-sb-avatar">{{ getInitials() }}</div>
+        <div class="od-sb-user-info">
+          <span class="od-sb-uname">{{ username }}</span>
+          <span class="od-sb-urole">officer</span>
+        </div>
+      </div>
+      <a class="od-sb-item od-sb-logout" (click)="logout()">
+        <i class="bi bi-box-arrow-right"></i> Logout
+      </a>
+    </div>
+
+  </aside>
+
+  <div class="od-sidebar-backdrop" *ngIf="sidebarOpen" (click)="closeSidebar()"></div>
+
+  <div class="od-main">
+
+    <!-- Topbar -->
+    <div class="od-topbar">
+      <button class="od-sb-toggle" (click)="toggleSidebar()">   <!-- ← NEW hamburger -->
+        <i class="bi bi-list"></i>
+      </button>
+      <h1 class="od-topbar-title">
+        {{ activeView === 'dashboard' ? 'Officer Dashboard' : 'Assigned Cases' }}
+      </h1>
+      <div class="od-urgent-pill" *ngIf="urgentCount > 0">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        {{ urgentCount }} urgent case{{ urgentCount !== 1 ? 's' : '' }} need attention
+      </div>
+    </div>
+
+    <div class="od-body">
+
+      <!-- ══════════════ DASHBOARD VIEW ══════════════ -->
+      <ng-container *ngIf="activeView === 'dashboard'">
+
+        <!-- Welcome banner -->
+        <div class="od-welcome">
+          <div class="od-welcome-blob od-welcome-blob--tr"></div>
+          <div class="od-welcome-blob od-welcome-blob--br"></div>
+          <div class="od-welcome-content">
+            <p class="od-welcome-label">Good day, Officer</p>
+            <h2 class="od-welcome-name">{{ username }}</h2>
+            <p class="od-welcome-sub">
+              <strong>{{ inProgress }}</strong> in progress ·
+              <strong>{{ pending }}</strong> pending review
+            </p>
+          </div>
+        </div>
+
+        <!-- Stat cards -->
+        <div class="od-stats">
+          <div class="od-stat-card">
+            <div class="od-stat-icon od-stat-icon--blue"><i class="bi bi-clipboard-fill"></i></div>
+            <div>
+              <div class="od-stat-value">{{ total }}</div>
+              <div class="od-stat-label">Assigned</div>
+            </div>
+          </div>
+          <div class="od-stat-card">
+            <div class="od-stat-icon od-stat-icon--amber"><i class="bi bi-clock-fill"></i></div>
+            <div>
+              <div class="od-stat-value">{{ pending }}</div>
+              <div class="od-stat-label">Pending</div>
+            </div>
+          </div>
+          <div class="od-stat-card">
+            <div class="od-stat-icon od-stat-icon--indigo"><i class="bi bi-arrow-repeat"></i></div>
+            <div>
+              <div class="od-stat-value">{{ inProgress }}</div>
+              <div class="od-stat-label">In Progress</div>
+            </div>
+          </div>
+          <div class="od-stat-card">
+            <div class="od-stat-icon od-stat-icon--green"><i class="bi bi-check-circle-fill"></i></div>
+            <div>
+              <div class="od-stat-value">{{ resolved }}</div>
+              <div class="od-stat-label">Resolved</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard grid -->
+        <div class="od-grid">
+
+          <!-- Recent cases -->
+          <div class="od-card">
+            <div class="od-card-head">
+              <h3 class="od-card-title">Recent Cases</h3>
+              <a class="od-link" (click)="setView('cases')">
+                View all <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+
+            <div *ngIf="loading" class="od-loading">
+              <div class="spinner-border spinner-border-sm text-primary"></div>
+              <span>Loading cases…</span>
+            </div>
+
+            <div *ngIf="!loading && recent.length === 0" class="od-empty">
+              <i class="bi bi-clipboard od-empty-icon"></i>
+              <p class="od-empty-title">No cases assigned</p>
+              <p class="od-empty-sub">You have no complaints assigned yet.</p>
+            </div>
+
+            <div *ngIf="!loading && recent.length > 0" class="od-complaint-cards">
+              <div *ngFor="let c of recent" class="od-complaint-card" (click)="viewComplaint(c)">
+
+                <div class="od-complaint-card-img" *ngIf="c.attachmentName">
+                  <img [src]="fileUrl + '/' + getFileNameFromPath(c.attachmentPath)"
+                       [alt]="c.attachmentName" (error)="onImgError($event)" />
+                </div>
+                <div class="od-complaint-card-img od-complaint-card-img--placeholder" *ngIf="!c.attachmentName">
+                  <i class="bi bi-file-earmark-text"></i>
+                </div>
+
+                <div class="od-complaint-card-body">
+                  <div class="od-complaint-card-top">
+                    <span class="od-id">#{{ c.id }}</span>
+                    <span class="od-badge" [ngClass]="getStatusClass(c.status)">{{ formatStatus(c.status) }}</span>
+                  </div>
+                  <div class="od-complaint-card-title">{{ c.title }}</div>
+                  <div class="od-complaint-card-desc">{{ c.description }}</div>
+                  <div class="od-complaint-card-meta">
+                    <span class="od-badge" [ngClass]="getPriorityClass(c.priority)">{{ c.priority }}</span>
+                    <span class="od-complaint-citizen">
+                      <i class="bi bi-person"></i>{{ c.citizenName || c.citizenEmail || '—' }}
+                    </span>
+                  </div>
+                  <div class="od-complaint-card-info">
+                    <span class="od-complaint-date">
+                      <i class="bi bi-calendar3"></i>{{ formatDate(c.createdAt) }}
+                    </span>
+                  </div>
+                  <div class="od-complaint-card-footer">
+                    <span>View complaint</span>
+                    <i class="bi bi-arrow-right"></i>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick update -->
+          <div class="od-card">
+            <div class="od-card-head">
+              <h3 class="od-card-title">Quick Update</h3>
+            </div>
+            <div class="od-update-form">
+              <div class="od-field">
+                <label class="od-field-label">Select Complaint</label>
+                <select class="od-select" [ngModel]="selectedId"
+                        (ngModelChange)="onSelectComplaint($event)" name="selectedComplaint">
+                  <option [value]="null" disabled>Choose a case…</option>
+                  <option *ngFor="let c of complaints" [value]="c.id">
+                    #{{ c.id }} — {{ c.title }}
+                  </option>
+                </select>
+              </div>
+              <div class="od-field">
+                <label class="od-field-label">Update Status</label>
+                <select class="od-select" [(ngModel)]="updateStatus" name="updateStatus">
+                  <option *ngFor="let s of statusOptions" [value]="s">{{ formatStatus(s) }}</option>
+                </select>
+              </div>
+              <div class="od-field">
+                <label class="od-field-label">Resolution Note</label>
+                <textarea class="od-textarea" [(ngModel)]="updateComment"
+                          name="updateComment" rows="4"
+                          placeholder="Add resolution comments or notes…"></textarea>
+              </div>
+              <button class="od-update-btn" (click)="saveUpdate()" [disabled]="saving">
+                <span *ngIf="saving" class="spinner-border spinner-border-sm"></span>
+                <ng-container *ngIf="!saving"><i class="bi bi-floppy-fill"></i> Save Update</ng-container>
+                <ng-container *ngIf="saving">Saving…</ng-container>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </ng-container>
+
+      <!-- ══════════════ ASSIGNED CASES VIEW ══════════════ -->
+      <div *ngIf="activeView === 'cases'" class="od-cases-page">
+
+        <!-- Page header -->
+        <div class="od-cases-header">
+          <div class="od-cases-header-left">
+            <div class="od-cases-header-icon">
+              <i class="bi bi-clipboard-check-fill"></i>
+            </div>
+            <div>
+              <h2 class="od-cases-title">Assigned Cases</h2>
+              <p class="od-cases-subtitle">All complaints currently assigned to you</p>
+            </div>
+          </div>
+          <div class="od-cases-stats-row">
+            <div class="od-cases-stat od-cases-stat--amber">
+              <span class="od-cases-stat-val">{{ pending }}</span>
+              <span class="od-cases-stat-lbl">Pending</span>
+            </div>
+            <div class="od-cases-stat od-cases-stat--indigo">
+              <span class="od-cases-stat-val">{{ inProgress }}</span>
+              <span class="od-cases-stat-lbl">In Progress</span>
+            </div>
+            <div class="od-cases-stat od-cases-stat--green">
+              <span class="od-cases-stat-val">{{ resolved }}</span>
+              <span class="od-cases-stat-lbl">Resolved</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Filter + Search + Sort bar ── -->
+        <div class="od-filter-bar" *ngIf="!loading && complaints.length > 0">
+
+          <!-- Search -->
+          <div class="od-search-wrap">
+            <i class="bi bi-search od-search-icon"></i>
+            <input class="od-search-input" type="text"
+                   [(ngModel)]="casesSearch"
+                   placeholder="Search by title…">
+            <button *ngIf="casesSearch" class="od-search-clear" (click)="casesSearch = ''">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <!-- Status filter tabs -->
+          <div class="od-filter-tabs">
+            <button class="od-filter-tab" [class.active]="casesStatusFilter === ''"
+                    (click)="casesStatusFilter = ''">All</button>
+            <button class="od-filter-tab" [class.active]="casesStatusFilter === 'PENDING'"
+                    (click)="casesStatusFilter = 'PENDING'">
+              <span class="od-filter-dot od-dot--amber"></span> Pending
+            </button>
+            <button class="od-filter-tab" [class.active]="casesStatusFilter === 'IN_PROGRESS'"
+                    (click)="casesStatusFilter = 'IN_PROGRESS'">
+              <span class="od-filter-dot od-dot--indigo"></span> In Progress
+            </button>
+            <button class="od-filter-tab" [class.active]="casesStatusFilter === 'RESOLVED'"
+                    (click)="casesStatusFilter = 'RESOLVED'">
+              <span class="od-filter-dot od-dot--green"></span> Resolved
+            </button>
+            <button class="od-filter-tab" [class.active]="casesStatusFilter === 'REJECTED'"
+                    (click)="casesStatusFilter = 'REJECTED'">
+              <span class="od-filter-dot od-dot--red"></span> Rejected
+            </button>
+          </div>
+
+          <!-- Sort -->
+          <div class="od-sort-wrap">
+            <i class="bi bi-sort-down od-sort-icon"></i>
+            <select class="od-sort-select" [(ngModel)]="casesSort">
+              <option value="date-desc">Newest first</option>
+              <option value="date-asc">Oldest first</option>
+              <option value="priority-high">Priority: High first</option>
+              <option value="priority-low">Priority: Low first</option>
+            </select>
+          </div>
+
+          <!-- Count -->
+          <span class="od-filter-count">
+            {{ filteredCases.length }} case{{ filteredCases.length !== 1 ? 's' : '' }}
+          </span>
+
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="od-loading">
+          <div class="spinner-border spinner-border-sm text-primary"></div>
+          <span>Loading assigned cases…</span>
+        </div>
+
+        <!-- Empty -->
+        <div *ngIf="!loading && complaints.length === 0" class="od-empty">
+          <i class="bi bi-clipboard od-empty-icon"></i>
+          <p class="od-empty-title">No cases assigned</p>
+          <p class="od-empty-sub">You have no complaints assigned yet.</p>
+        </div>
+
+        <!-- No results after filter -->
+        <div *ngIf="!loading && complaints.length > 0 && filteredCases.length === 0" class="od-empty">
+          <i class="bi bi-search od-empty-icon"></i>
+          <p class="od-empty-title">No results found</p>
+          <p class="od-empty-sub">Try adjusting your search or filter.</p>
+          <button class="od-clear-filters-btn" (click)="casesSearch = ''; casesStatusFilter = ''">
+            <i class="bi bi-x-circle"></i> Clear filters
+          </button>
+        </div>
+
+        <!-- Cases table -->
+        <div *ngIf="!loading && filteredCases.length > 0" class="od-card od-cases-table-card">
+          <div class="od-table-wrap">
+            <table class="od-table">
+              <thead>
+              <tr>
+                <th>#ID</th>
+                <th>Complaint</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Location</th>
+                <th>Citizen</th>
+                <th>Created</th>
+                <th>Attachment</th>
+                <th></th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let c of filteredCases" class="od-table-row" (click)="viewComplaint(c)">
+
+                <td class="od-id">#{{ c.id }}</td>
+
+                <td>
+                  <div class="od-complaint-title">{{ c.title }}</div>
+                  <div class="od-complaint-desc">{{ c.description }}</div>
+                </td>
+
+                <td>
+                    <span class="od-badge" [ngClass]="getPriorityClass(c.priority)">
+                      {{ c.priority }}
+                    </span>
+                </td>
+
+                <td>
+                    <span class="od-badge" [ngClass]="getStatusClass(c.status)">
+                      {{ formatStatus(c.status) }}
+                    </span>
+                </td>
+
+                <!-- Location -->
+                <td class="od-location-cell">
+                  <ng-container *ngIf="c.address; else noLocation">
+
+                    <a
+                      *ngIf="c.latitude != null && c.longitude != null"
+                      [href]="'https://www.google.com/maps/search/?api=1&query='
+                + c.latitude + ',' + c.longitude"
+                      target="_blank"
+                      class="od-location-link"
+                      (click)="$event.stopPropagation()"
+                    >
+                      <div
+                        class="od-location-address"
+                        [title]="c.address"
+                      >
+                        <i class="bi bi-geo-alt"></i>
+                        {{ c.address }}
+                      </div>
+                    </a>
+
+                    <!-- Address exists but coordinates don't -->
+                    <div *ngIf="c.latitude == null || c.longitude == null">
+                      <div
+                        class="od-location-address"
+                        [title]="c.address"
+                      >
+                        <i class="bi bi-geo-alt"></i>
+                        {{ c.address }}
+                      </div>
+                    </div>
+
+                  </ng-container>
+
+                  <ng-template #noLocation>
+                    <span class="od-muted">—</span>
+                  </ng-template>
+                </td>
+
+                <td class="od-muted">{{ c.citizenName || c.citizenEmail || '—' }}</td>
+
+                <td class="od-muted od-nowrap">{{ formatDate(c.createdAt) }}</td>
+
+                <td>
+                  <a *ngIf="c.attachmentName"
+                     [href]="fileUrl + '/' + getFileNameFromPath(c.attachmentPath)"
+                     target="_blank" class="od-attachment-link"
+                     (click)="$event.stopPropagation()">
+                    <i class="bi bi-paperclip"></i> {{ c.attachmentName }}
+                  </a>
+                  <span *ngIf="!c.attachmentName" class="od-muted">—</span>
+                </td>
+
+                <td><i class="bi bi-chevron-right od-chevron"></i></td>
+
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ══════════════ COMPLAINT DETAIL MODAL ══════════════ -->
+      <div class="ad-modal-backdrop" *ngIf="showDetailModal" (click)="closeDetailModal()">
+        <div class="od-detail-modal" (click)="$event.stopPropagation()">
+
+          <div class="od-detail-modal-header">
+            <div class="od-detail-modal-title-row">
+              <div class="od-detail-modal-id">#{{ selectedComplaint?.id }}</div>
+              <span class="od-badge" [ngClass]="getStatusClass(selectedComplaint?.status)">
+                {{ formatStatus(selectedComplaint?.status) }}
+              </span>
+            </div>
+            <button class="od-detail-modal-close" (click)="closeDetailModal()">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <div class="od-detail-modal-body" *ngIf="selectedComplaint as c">
+
+            <!-- Image if present -->
+            <div class="od-detail-img-wrap" *ngIf="c.attachmentName && isImage(c.attachmentName)">
+              <img [src]="fileUrl + '/' + getFileNameFromPath(c.attachmentPath)"
+                   [alt]="c.attachmentName" (error)="onImgError($event)" />
+            </div>
+
+            <h3 class="od-detail-title">{{ c.title }}</h3>
+            <p class="od-detail-desc">{{ c.description }}</p>
+
+            <div class="od-detail-grid">
+              <div class="od-detail-item">
+                <span class="od-detail-label"><i class="bi bi-tag"></i> Category</span>
+                <span class="od-detail-val">{{ c.category || '—' }}</span>
+              </div>
+              <div class="od-detail-item od-detail-item--location">
+  <span class="od-detail-label">
+    <i class="bi bi-geo-alt-fill"></i> Location
+  </span>
+
+                <ng-container *ngIf="c.address; else noLocation">
+
+                  <!-- Open exact coordinates in Google Maps -->
+                  <a
+                    *ngIf="c.latitude != null && c.longitude != null"
+                    [href]="'https://www.google.com/maps/search/?api=1&query='
+        + c.latitude + ',' + c.longitude"
+                    target="_blank"
+                    class="od-detail-val od-location-value"
+                    (click)="$event.stopPropagation()"
+                  >
+      <span class="od-location-address">
+        {{ c.address }}
+      </span>
+
+                  </a>
+
+                  <!-- Address available but coordinates unavailable -->
+                  <span
+                    *ngIf="c.latitude == null || c.longitude == null"
+                    class="od-detail-val od-location-value"
+                  >
+      {{ c.address }}
+    </span>
+
+                </ng-container>
+
+                <ng-template #noLocation>
+                  <span class="od-detail-val">—</span>
+                </ng-template>
+              </div>
+              <div class="od-detail-item">
+                <span class="od-detail-label"><i class="bi bi-flag"></i> Priority</span>
+                <span class="od-badge" [ngClass]="getPriorityClass(c.priority)">{{ c.priority }}</span>
+              </div>
+              <div class="od-detail-item">
+                <span class="od-detail-label"><i class="bi bi-person"></i> Citizen</span>
+                <span class="od-detail-val">{{ c.citizenName || '—' }}</span>
+              </div>
+              <div class="od-detail-item">
+                <span class="od-detail-label"><i class="bi bi-envelope"></i> Email</span>
+                <span class="od-detail-val">{{ c.citizenEmail || '—' }}</span>
+              </div>
+              <div class="od-detail-item">
+                <span class="od-detail-label"><i class="bi bi-calendar3"></i> Created</span>
+                <span class="od-detail-val">{{ c.createdAt ? (c.createdAt | date:'dd MMM yyyy, h:mm a') : '—' }}</span>
+              </div>
+              <div class="od-detail-item">
+                <span class="od-detail-label"><i class="bi bi-pencil"></i> Updated</span>
+                <span class="od-detail-val">{{ c.updatedAt ? (c.updatedAt | date:'dd MMM yyyy, h:mm a') : '—' }}</span>
+              </div>
+              <div class="od-detail-item" *ngIf="c.resolvedAt">
+                <span class="od-detail-label"><i class="bi bi-check-circle"></i> Resolved</span>
+                <span class="od-detail-val">{{ c.resolvedAt | date:'dd MMM yyyy, h:mm a' }}</span>
+              </div>
+              <div class="od-detail-item" *ngIf="c.attachmentName">
+                <span class="od-detail-label"><i class="bi bi-paperclip"></i> Attachment</span>
+                <a [href]="fileUrl + '/' + getFileNameFromPath(c.attachmentPath)"
+                   target="_blank" class="od-attachment-link">
+                  {{ c.attachmentName }}
+                </a>
+              </div>
+            </div>
+
+            <div class="od-detail-resolution" *ngIf="c.resolutionComment">
+              <div class="od-detail-resolution-label">
+                <i class="bi bi-chat-text-fill"></i> Resolution Comment
+              </div>
+              <p class="od-detail-resolution-text">{{ c.resolutionComment }}</p>
+            </div>
+
+          </div>
+
+          <div class="od-detail-modal-footer">
+            <button class="od-detail-close-btn" (click)="closeDetailModal()">Close</button>
+            <button class="od-update-btn od-detail-update-btn"
+                    (click)="onSelectComplaint(selectedComplaint!.id!); closeDetailModal(); setView('dashboard')">
+              <i class="bi bi-pencil-fill"></i> Quick Update
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

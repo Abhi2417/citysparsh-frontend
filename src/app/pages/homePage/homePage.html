@@ -1,0 +1,407 @@
+<!-- ===== NAVBAR ===== -->
+<nav class="cs-home-nav">
+  <div class="cs-home-nav-brand">
+    <div class="cs-home-logo-icon">
+      <i class="bi bi-buildings"></i>
+    </div>
+    <a class="cs-home-logo-text" routerLink="/">CitySparsh</a>
+  </div>
+
+  <div class="cs-home-nav-actions">
+
+    <!-- NOT logged in -->
+    <ng-container *ngIf="!isLoggedIn">
+      <a routerLink="/login" class="cs-home-btn-outline">Sign in</a>
+      <a routerLink="/register" class="cs-home-btn-primary">
+        Get started <i class="bi bi-arrow-right"></i>
+      </a>
+    </ng-container>
+
+    <!-- Logged in — dropdown goes HERE inside nav-actions -->
+    <ng-container *ngIf="isLoggedIn">
+      <div class="cs-home-nav-user" (click)="toggleDropdown()">
+        <div class="cs-home-nav-avatar">{{ initials }}</div>
+        <span class="cs-home-nav-uname">{{ username }}</span>
+        <i class="bi bi-chevron-down cs-home-nav-chevron" [class.open]="dropdownOpen"></i>
+
+        <div class="cs-home-nav-dropdown" *ngIf="dropdownOpen">
+          <div class="cs-home-nav-dropdown-header">
+            <div class="cs-home-nav-dropdown-name">{{ username }}</div>
+            <span class="cs-home-nav-dropdown-role" [ngClass]="roleBadgeClass">
+              <i class="bi" [ngClass]="roleIcon"></i> {{ role | titlecase }}
+            </span>
+          </div>
+          <div class="cs-home-nav-dropdown-divider"></div>
+          <a [routerLink]="dashboardLink" class="cs-home-nav-dropdown-item" (click)="closeDropdown()">
+            <i class="bi bi-grid-1x2-fill"></i> My Dashboard
+          </a>
+          <button class="cs-home-nav-dropdown-item cs-home-nav-dropdown-logout" (click)="logout()">
+            <i class="bi bi-box-arrow-right"></i> Logout
+          </button>
+        </div>
+      </div>
+    </ng-container>
+
+  </div>
+</nav>
+
+<!-- ===== GUEST HERO ===== -->
+<section class="cs-home-hero" *ngIf="!isLoggedIn">
+  <div class="cs-home-hero-badge">
+    <i class="bi bi-geo-alt-fill"></i>
+    Civic issue management, reimagined
+  </div>
+  <h1 class="cs-home-hero-title">
+    Your city. Your voice.<br>Real change.
+  </h1>
+  <p class="cs-home-hero-sub">
+    CitySparsh connects citizens to local government. Report issues in your
+    neighbourhood, track progress, and watch your community improve.
+  </p>
+  <div class="cs-home-hero-actions">
+    <a routerLink="/register" class="cs-home-btn-primary cs-home-btn-lg">
+      <i class="bi bi-person-plus"></i> Register as Citizen
+    </a>
+    <a routerLink="/login" class="cs-home-btn-outline cs-home-btn-lg">
+      Sign in to your account
+    </a>
+  </div>
+</section>
+
+<!-- ===== RECENT COMPLAINTS (logged in) ===== -->
+<section class="cs-home-section cs-home-recent" *ngIf="isLoggedIn">
+  <div class="cs-home-section-header">
+    <p class="cs-home-eyebrow">Your activity</p>
+    <h2 class="cs-home-section-title">Recent complaints</h2>
+  </div>
+
+  <!-- Loading -->
+  <div class="cs-home-recent-loading" *ngIf="loadingComplaints">
+    <div class="spinner-border spinner-border-sm text-primary"></div>
+    <span>Loading your complaints…</span>
+  </div>
+
+  <!-- Empty -->
+  <div class="cs-home-recent-empty" *ngIf="!loadingComplaints && recentComplaints.length === 0">
+
+    <!-- CITIZEN -->
+    <ng-container *ngIf="role === 'CITIZEN'">
+      <i class="bi bi-chat-left-dots cs-home-recent-empty-icon"></i>
+      <p class="cs-home-recent-empty-title">No complaints yet</p>
+      <p class="cs-home-recent-empty-sub">
+        Have an issue in your neighbourhood? File your first complaint and track its progress.
+      </p>
+      <a routerLink="/citizen" class="cs-home-btn-primary" style="margin-top:12px">
+        <i class="bi bi-plus-lg"></i> File a complaint
+      </a>
+    </ng-container>
+
+    <!-- OFFICER -->
+    <ng-container *ngIf="role === 'OFFICER'">
+      <i class="bi bi-clipboard cs-home-recent-empty-icon" style="color:#d97706"></i>
+      <p class="cs-home-recent-empty-title">No cases assigned yet</p>
+      <p class="cs-home-recent-empty-sub">
+        You have no complaints assigned to you yet. Check back later or visit your dashboard.
+      </p>
+      <a routerLink="/officer-dashboard" class="cs-home-btn-primary" style="margin-top:12px;background:#d97706">
+        <i class="bi bi-grid-1x2-fill"></i> Go to Officer Dashboard
+      </a>
+    </ng-container>
+
+    <!-- ADMIN -->
+    <ng-container *ngIf="role === 'ADMIN'">
+      <i class="bi bi-inbox cs-home-recent-empty-icon" style="color:#7c3aed"></i>
+      <p class="cs-home-recent-empty-title">No complaints in the system</p>
+      <p class="cs-home-recent-empty-sub">
+        No complaints have been filed yet. Create officer accounts and wait for citizens to register.
+      </p>
+      <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;justify-content:center">
+        <a routerLink="/admin" class="cs-home-btn-primary" style="background:#7c3aed">
+          <i class="bi bi-grid-1x2-fill"></i> Admin Dashboard
+        </a>
+        <a routerLink="/admin" class="cs-home-btn-outline">
+          <i class="bi bi-person-plus-fill"></i> Create Officer
+        </a>
+      </div>
+    </ng-container>
+
+  </div>
+
+  <!-- Cards -->
+  <div class="cs-home-recent-grid" *ngIf="!loadingComplaints && recentComplaints.length > 0">
+    <div class="cs-home-recent-card" *ngFor="let c of recentComplaints">
+      <div class="cs-home-recent-card-top">
+        <span class="cs-home-recent-id">#{{ c.id }}</span>
+        <span class="cs-home-recent-status" [ngClass]="getStatusClass(c.status)">
+          {{ formatStatus(c.status) }}
+        </span>
+      </div>
+      <div class="cs-home-recent-title">{{ c.title }}</div>
+      <div class="cs-home-recent-desc">{{ c.description }}</div>
+      <div class="cs-home-recent-card-bottom">
+        <span class="cs-home-recent-priority" [ngClass]="getPriorityClass(c.priority)">
+          {{ c.priority }}
+        </span>
+        <span class="cs-home-recent-date">{{ c.createdAt | date:'dd MMM yyyy' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- View all link -->
+  <div class="cs-home-recent-footer" *ngIf="!loadingComplaints && recentComplaints.length > 0">
+    <a [routerLink]="dashboardLink" class="cs-home-btn-outline">
+      View all in dashboard <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+</section>
+
+<!-- ===== STATS BAND ===== -->
+<div class="cs-home-stats">
+  <div class="cs-home-stat">
+    <div class="cs-home-stat-value">
+      <span *ngIf="!loadingStats">{{ formatStat(stats.totalResolved) }}</span>
+      <span *ngIf="loadingStats" class="cs-home-stat-skeleton"></span>
+    </div>
+    <div class="cs-home-stat-label">
+      <span class="cs-home-live-dot"></span>
+      Complaints resolved
+    </div>
+  </div>
+  <div class="cs-home-stat">
+    <div class="cs-home-stat-value">
+      <span *ngIf="!loadingStats">{{ formatStat(stats.activeOfficers) }}</span>
+      <span *ngIf="loadingStats" class="cs-home-stat-skeleton"></span>
+    </div>
+    <div class="cs-home-stat-label">Field officers active</div>
+  </div>
+  <div class="cs-home-stat">
+    <div class="cs-home-stat-value">
+      <span *ngIf="!loadingStats">{{ formatStat(stats.totalComplaints) }}</span>
+      <span *ngIf="loadingStats" class="cs-home-stat-skeleton"></span>
+    </div>
+    <div class="cs-home-stat-label">Total complaints</div>
+  </div>
+  <div class="cs-home-stat">
+    <div class="cs-home-stat-value">
+      <span *ngIf="!loadingStats">{{ formatStat(stats.totalCitizens) }}</span>
+      <span *ngIf="loadingStats" class="cs-home-stat-skeleton"></span>
+    </div>
+    <div class="cs-home-stat-label">Registered citizens</div>
+  </div>
+</div>
+
+<!-- ===== HOW IT WORKS ===== -->
+<section class="cs-home-section">
+  <div class="cs-home-section-header">
+    <p class="cs-home-eyebrow">How it works</p>
+    <h2 class="cs-home-section-title">From complaint to resolution</h2>
+  </div>
+
+  <div class="cs-home-steps">
+    <div class="cs-home-step">
+      <div class="cs-home-step-icon cs-step-blue">
+        <i class="bi bi-pencil-square"></i>
+      </div>
+      <div class="cs-home-step-num">Step 1</div>
+      <h3 class="cs-home-step-title">File a complaint</h3>
+      <p class="cs-home-step-desc">Describe the issue, set priority, and attach evidence photos or URLs.</p>
+    </div>
+
+    <div class="cs-home-step">
+      <div class="cs-home-step-icon cs-step-amber">
+        <i class="bi bi-person-check"></i>
+      </div>
+      <div class="cs-home-step-num">Step 2</div>
+      <h3 class="cs-home-step-title">Admin assigns officer</h3>
+      <p class="cs-home-step-desc">Admin reviews and assigns the complaint to a qualified field officer.</p>
+    </div>
+
+    <div class="cs-home-step">
+      <div class="cs-home-step-icon cs-step-green">
+        <i class="bi bi-clipboard-check"></i>
+      </div>
+      <div class="cs-home-step-num">Step 3</div>
+      <h3 class="cs-home-step-title">Officer investigates</h3>
+      <p class="cs-home-step-desc">Officer visits the site, updates status, and adds resolution notes.</p>
+    </div>
+
+    <div class="cs-home-step">
+      <div class="cs-home-step-icon cs-step-teal">
+        <i class="bi bi-check-circle"></i>
+      </div>
+      <div class="cs-home-step-num">Step 4</div>
+      <h3 class="cs-home-step-title">Issue resolved</h3>
+      <p class="cs-home-step-desc">Citizen gets notified. Complaint marked resolved with full audit trail.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== THREE ROLES ===== -->
+<section class="cs-home-section">
+  <div class="cs-home-section-header">
+    <p class="cs-home-eyebrow">Who uses CitySparsh</p>
+    <h2 class="cs-home-section-title">Three roles, one platform</h2>
+  </div>
+
+  <div class="cs-home-roles">
+
+    <!-- Citizen -->
+    <div class="cs-home-role-card" [class.cs-role-active]="role === 'CITIZEN'">
+      <div class="cs-home-role-card-top">
+        <div class="cs-home-role-icon cs-role-blue"><i class="bi bi-people"></i></div>
+        <span class="cs-home-badge cs-badge-blue">Citizen</span>
+      </div>
+      <h3 class="cs-home-role-title">Report &amp; track issues</h3>
+      <p class="cs-home-role-desc">File complaints, set priority levels, track status in real time, and view resolution history.</p>
+      <ul class="cs-home-role-features">
+        <li><i class="bi bi-check-circle-fill"></i> File new complaints with priority</li>
+        <li><i class="bi bi-check-circle-fill"></i> Track status live</li>
+        <li><i class="bi bi-check-circle-fill"></i> View assigned officer</li>
+        <li><i class="bi bi-check-circle-fill"></i> Read resolution comments</li>
+      </ul>
+      <a *ngIf="!isLoggedIn" routerLink="/register" class="cs-home-role-btn cs-home-btn-outline">
+        Register free <i class="bi bi-arrow-right"></i>
+      </a>
+      <a *ngIf="isLoggedIn && role === 'CITIZEN'" routerLink="/citizen" class="cs-home-role-btn cs-home-btn-primary">
+        Go to dashboard <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    <!-- Officer -->
+    <div class="cs-home-role-card" [class.cs-role-active]="role === 'OFFICER'">
+      <div class="cs-home-role-card-top">
+        <div class="cs-home-role-icon cs-role-amber"><i class="bi bi-shield-check"></i></div>
+        <span class="cs-home-badge cs-badge-amber">Officer</span>
+      </div>
+      <h3 class="cs-home-role-title">Investigate &amp; resolve</h3>
+      <p class="cs-home-role-desc">View assigned complaints, update statuses, add resolution comments, and close cases efficiently.</p>
+      <ul class="cs-home-role-features">
+        <li><i class="bi bi-check-circle-fill"></i> View all assigned cases</li>
+        <li><i class="bi bi-check-circle-fill"></i> Update complaint status</li>
+        <li><i class="bi bi-check-circle-fill"></i> Add resolution notes</li>
+        <li><i class="bi bi-check-circle-fill"></i> Mark complaints resolved</li>
+      </ul>
+      <a *ngIf="!isLoggedIn" routerLink="/login" class="cs-home-role-btn cs-home-btn-outline">
+        Officer login <i class="bi bi-arrow-right"></i>
+      </a>
+      <a *ngIf="isLoggedIn && role === 'OFFICER'" routerLink="/officer-dashboard" class="cs-home-role-btn cs-home-btn-primary">
+        Go to dashboard <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    <!-- Admin -->
+    <div class="cs-home-role-card" [class.cs-role-active]="role === 'ADMIN'">
+      <div class="cs-home-role-card-top">
+        <div class="cs-home-role-icon cs-role-purple"><i class="bi bi-gear"></i></div>
+        <span class="cs-home-badge cs-badge-purple">Admin</span>
+      </div>
+      <h3 class="cs-home-role-title">Manage &amp; oversee</h3>
+      <p class="cs-home-role-desc">Full visibility — manage all complaints, assign officers, create officer accounts, and monitor KPIs.</p>
+      <ul class="cs-home-role-features">
+        <li><i class="bi bi-check-circle-fill"></i> View all complaints</li>
+        <li><i class="bi bi-check-circle-fill"></i> Assign officers to cases</li>
+        <li><i class="bi bi-check-circle-fill"></i> Create officer accounts</li>
+        <li><i class="bi bi-check-circle-fill"></i> Override priority &amp; status</li>
+      </ul>
+      <a *ngIf="!isLoggedIn" routerLink="/login" class="cs-home-role-btn cs-home-btn-outline">
+        Admin login <i class="bi bi-arrow-right"></i>
+      </a>
+      <a *ngIf="isLoggedIn && role === 'ADMIN'" routerLink="/admin-dashboard" class="cs-home-role-btn cs-home-btn-primary">
+        Go to dashboard <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== CATEGORIES + PRIORITY ===== -->
+<section class="cs-home-section">
+  <div class="cs-home-two-col">
+
+    <div class="cs-home-categories">
+      <p class="cs-home-eyebrow">Issue categories</p>
+      <h2 class="cs-home-section-title cs-home-section-title-left">Common complaint types</h2>
+      <p class="cs-home-section-sub">Citizens can report anything that affects their daily life</p>
+      <div class="cs-home-cat-grid">
+        <div class="cs-home-cat-item"><i class="bi bi-cone-striped cs-cat-blue"></i><span>Roads &amp; potholes</span></div>
+        <div class="cs-home-cat-item"><i class="bi bi-lightbulb cs-cat-amber"></i><span>Street lighting</span></div>
+        <div class="cs-home-cat-item"><i class="bi bi-droplet cs-cat-teal"></i><span>Water &amp; drainage</span></div>
+        <div class="cs-home-cat-item"><i class="bi bi-trash cs-cat-red"></i><span>Waste management</span></div>
+        <div class="cs-home-cat-item"><i class="bi bi-tree cs-cat-green"></i><span>Parks &amp; greenery</span></div>
+        <div class="cs-home-cat-item"><i class="bi bi-building cs-cat-purple"></i><span>Public buildings</span></div>
+      </div>
+    </div>
+
+    <div class="cs-home-priority">
+      <p class="cs-home-eyebrow">Priority system</p>
+      <h2 class="cs-home-section-title cs-home-section-title-left">Right urgency, every time</h2>
+      <p class="cs-home-section-sub">Officers are notified based on urgency so critical issues are resolved first.</p>
+      <div class="cs-home-priority-list">
+        <div class="cs-home-priority-item">
+          <div class="cs-priority-dot cs-dot-high"></div>
+          <div class="cs-home-priority-info">
+            <div class="cs-home-priority-name">High</div>
+            <div class="cs-home-priority-desc">Safety or infrastructure threat — resolved within 24 hrs</div>
+          </div>
+          <span class="cs-home-badge cs-badge-red">Urgent</span>
+        </div>
+        <div class="cs-home-priority-item">
+          <div class="cs-priority-dot cs-dot-medium"></div>
+          <div class="cs-home-priority-info">
+            <div class="cs-home-priority-name">Medium</div>
+            <div class="cs-home-priority-desc">Quality-of-life issues — addressed within 48–72 hrs</div>
+          </div>
+          <span class="cs-home-badge cs-badge-amber">Normal</span>
+        </div>
+        <div class="cs-home-priority-item">
+          <div class="cs-priority-dot cs-dot-low"></div>
+          <div class="cs-home-priority-info">
+            <div class="cs-home-priority-name">Low</div>
+            <div class="cs-home-priority-desc">Minor inconveniences — resolved within a week</div>
+          </div>
+          <span class="cs-home-badge cs-badge-green">Routine</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== CTA BAND ===== -->
+<section class="cs-home-cta">
+  <h2 class="cs-home-cta-title">Ready to make a difference?</h2>
+  <p class="cs-home-cta-sub">
+    Join thousands of citizens already using CitySparsh to improve their neighbourhoods.
+  </p>
+  <div class="cs-home-cta-actions">
+    <ng-container *ngIf="!isLoggedIn">
+      <a routerLink="/register" class="cs-home-cta-btn-primary">
+        <i class="bi bi-person-plus"></i> Register as Citizen
+      </a>
+      <a routerLink="/login" class="cs-home-cta-btn-ghost">
+        Already have an account? Sign in
+      </a>
+    </ng-container>
+    <ng-container *ngIf="isLoggedIn">
+      <a [routerLink]="dashboardLink" class="cs-home-cta-btn-primary">
+        <i class="bi bi-grid-1x2-fill"></i> Go to my dashboard
+      </a>
+    </ng-container>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="cs-home-footer">
+  <div class="cs-home-footer-brand">
+    <div class="cs-home-logo-icon cs-home-logo-icon-sm"><i class="bi bi-buildings"></i></div>
+    <span class="cs-home-logo-text" style="font-size:14px">CitySparsh</span>
+  </div>
+  <p class="cs-home-footer-copy">
+    Civic complaint management system
+  </p>
+  <div class="cs-home-footer-links">
+    <a routerLink="/register">Citizen portal</a>
+    <a routerLink="/login">Officer portal</a>
+    <a routerLink="/login">Admin portal</a>
+  </div>
+</footer>

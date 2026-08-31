@@ -1,0 +1,192 @@
+<app-toast></app-toast>
+<div class="reg-page">
+
+  <!-- ═══ LEFT PANEL ═══ -->
+  <div class="reg-left">
+    <!-- Brand -->
+    <div class="reg-brand">
+      <div class="reg-brand-icon">
+        <i class="bi bi-buildings"></i>
+      </div>
+      <a class="reg-brand-name" routerLink="/">CitySparsh</a>
+    </div>
+
+    <!-- Hero copy -->
+    <div class="reg-hero">
+      <p class="reg-eyebrow">Civic portal</p>
+      <h1 class="reg-hero-title">
+        Your voice <em>shapes</em><br>your city.
+      </h1>
+      <p class="reg-hero-sub">
+        Join thousands of citizens reporting and tracking local issues —
+        from potholes to broken streetlights.
+      </p>
+
+      <!-- Steps -->
+      <ol class="reg-steps">
+        <li class="reg-step">
+          <div class="reg-step-num">1</div>
+          <div>
+            <strong>Create your account</strong>
+            Takes less than a minute to register.
+          </div>
+        </li>
+        <li class="reg-step">
+          <div class="reg-step-num">2</div>
+          <div>
+            <strong>Report an issue</strong>
+            Describe, prioritise, and attach photos.
+          </div>
+        </li>
+        <li class="reg-step">
+          <div class="reg-step-num">3</div>
+          <div>
+            <strong>Track resolution</strong>
+            Follow progress in real time until resolved.
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <p class="reg-left-footer">© 2025 CitySparsh · Civic Complaint Portal</p>
+  </div>
+
+  <!-- ═══ RIGHT PANEL ═══ -->
+  <div class="reg-right">
+    <div class="reg-form-wrap">
+
+      <!-- Header -->
+      <div class="reg-form-header">
+        <div class="reg-form-tag">
+          <i class="bi bi-person-plus"></i> New account
+        </div>
+        <h2 class="reg-form-title">Create your account</h2>
+        <p class="reg-form-sub">
+          Already registered?
+          <a routerLink="/login">Sign in here</a>
+        </p>
+      </div>
+
+      <!-- Form -->
+      <form (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- Name row -->
+        <div class="reg-field-row">
+          <div class="reg-field">
+            <label class="reg-label" for="firstName">First name</label>
+            <div class="reg-input-wrap" [class.error]="submitted && !firstName.trim()">
+              <input
+                id="firstName"
+                type="text"
+                class="reg-input"
+                [(ngModel)]="firstName"
+                name="firstName"
+                placeholder="Arjun"
+                autocomplete="given-name"
+              >
+            </div>
+            <span class="reg-error-msg" *ngIf="submitted && !firstName.trim()">Required</span>
+          </div>
+
+          <div class="reg-field">
+            <label class="reg-label" for="lastName">Last name</label>
+            <div class="reg-input-wrap" [class.error]="submitted && !lastName.trim()">
+              <input
+                id="lastName"
+                type="text"
+                class="reg-input"
+                [(ngModel)]="lastName"
+                name="lastName"
+                placeholder="Sharma"
+                autocomplete="family-name"
+              >
+            </div>
+            <span class="reg-error-msg" *ngIf="submitted && !lastName.trim()">Required</span>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="reg-field">
+          <label class="reg-label" for="email">Email address</label>
+          <div class="reg-input-wrap reg-input-icon-wrap" [class.error]="submitted && !email.includes('@')">
+            <i class="bi bi-envelope reg-input-icon"></i>
+            <input
+              id="email"
+              type="email"
+              class="reg-input reg-input-padded"
+              [(ngModel)]="email"
+              name="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+            >
+          </div>
+          <span class="reg-error-msg" *ngIf="submitted && !email.includes('@')">Enter a valid email</span>
+        </div>
+
+        <!-- Password -->
+        <div class="reg-field">
+          <label class="reg-label" for="password">
+            Password
+            <span class="reg-strength-label" [style.color]="strengthColor" *ngIf="password">
+              {{ strengthLabel }}
+            </span>
+          </label>
+          <div class="reg-input-wrap reg-input-icon-wrap" [class.error]="submitted && password.length < 6">
+            <i class="bi bi-lock reg-input-icon"></i>
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              class="reg-input reg-input-padded reg-input-padded-right"
+              [(ngModel)]="password"
+              name="password"
+              placeholder="Min. 6 characters"
+              autocomplete="new-password"
+            >
+            <button
+              type="button"
+              class="reg-eye-btn"
+              (click)="showPassword = !showPassword"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+            >
+              <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword"></i>
+            </button>
+          </div>
+
+          <!-- Strength bar -->
+          <div class="reg-strength-bar" *ngIf="password">
+            <div
+              class="reg-strength-seg"
+              *ngFor="let seg of [1,2,3,4]"
+              [style.background]="passwordStrength >= seg ? strengthColor : ''"
+            ></div>
+          </div>
+          <span class="reg-hint" *ngIf="!submitted || password.length >= 6">
+            Use 8+ characters with a mix of letters, numbers &amp; symbols
+          </span>
+          <span class="reg-error-msg" *ngIf="submitted && password.length < 6">
+            Password must be at least 6 characters
+          </span>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="reg-submit-btn" [disabled]="loading">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm"></span>
+          <ng-container *ngIf="!loading">
+            <i class="bi bi-arrow-right-circle"></i>
+            Create account
+          </ng-container>
+          <ng-container *ngIf="loading">Creating account…</ng-container>
+        </button>
+
+        <!-- Terms -->
+        <p class="reg-terms">
+          By registering you agree to our
+          <a href="#">Terms of Service</a> and
+          <a href="#">Privacy Policy</a>
+        </p>
+
+      </form>
+    </div>
+  </div>
+
+</div>

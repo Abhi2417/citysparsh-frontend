@@ -1,0 +1,1169 @@
+/* ============================================
+   CitySparsh — Home Page Styles
+   All classes namespaced with cs-home- to
+   avoid leaking into dashboard layouts.
+   ============================================ */
+
+/* ── Variables ─────────────────────────────── */
+:host {
+  display: block;
+  font-family: var(--font-body, 'DM Sans', system-ui, sans-serif);
+  background: #ffffff;
+  color: #0f172a;
+}
+
+/* ── Navbar ─────────────────────────────────── */
+.cs-home-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 64px;
+  border-bottom: 1px solid #e5e9f2;
+  background: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.cs-home-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cs-home-logo-icon {
+  width: 36px;
+  height: 36px;
+  background: #0f172a;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 18px;
+}
+
+.cs-home-logo-icon-sm {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  font-size: 14px;
+}
+
+.cs-home-logo-text {
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+  letter-spacing: -0.2px;
+}
+
+.cs-home-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── Buttons ─────────────────────────────────── */
+.cs-home-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 20px;
+  background: #1a56db;
+  color: #ffffff !important;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.16s ease;
+}
+.cs-home-btn-primary:hover {
+  background: #1240a8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(26, 86, 219, 0.3);
+}
+
+.cs-home-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 20px;
+  background: transparent;
+  color: #0f172a !important;
+  border: 1.5px solid #e5e9f2;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.16s ease;
+}
+.cs-home-btn-outline:hover {
+  border-color: #1a56db;
+  color: #1a56db !important;
+  background: #eef3fd;
+}
+
+.cs-home-btn-lg {
+  padding: 12px 26px;
+  font-size: 15px;
+}
+
+/* ── Hero ─────────────────────────────────────── */
+.cs-home-hero {
+  position: relative;
+  text-align: center;
+  padding: 80px 40px 64px;
+  max-width: 700px;
+  margin: 0 auto;
+  overflow: visible;
+
+  // Soft radial glow behind the headline
+  &::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 400px;
+    background: radial-gradient(ellipse at center, rgba(26,86,219,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+  }
+}
+.cs-home-hero {
+  background-image: radial-gradient(circle, #e5e9f2 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: center top;
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 60%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 60%, transparent 100%);
+}
+
+.cs-home-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 16px;
+  background: #e8f0fe;
+  color: #1240a8;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 28px;
+}
+
+.cs-home-hero-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 52px;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.12;
+  letter-spacing: -1px;
+  margin-bottom: 22px;
+}
+
+.cs-home-hero-sub {
+  font-size: 17px;
+  color: #64748b;
+  line-height: 1.75;
+  margin-bottom: 40px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cs-home-hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ── Stats Band ──────────────────────────────── */
+.cs-home-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid #e5e9f2;
+  border-bottom: 1px solid #e5e9f2;
+  background: #f8f9fc;
+  position: relative;
+}
+
+.cs-home-stat {
+  padding: 32px 24px;
+  text-align: center;
+  border-right: 1px solid #e5e9f2;
+  transition: background 0.2s ease;
+
+  &:hover { background: #ffffff; }
+  &:last-child { border-right: none; }
+}
+
+.cs-home-stat-value {
+  font-size: 34px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -1px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;   // prevents digit-width jitter
+}
+
+.cs-home-stat-label {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.cs-home-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: cs-pulse 2s infinite;
+}
+
+@keyframes cs-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(34,197,94,0); }
+}
+
+.cs-home-stat-value {
+  span {
+    display: inline-block;
+    animation: cs-stat-in 0.5s ease both;
+  }
+}
+
+@keyframes cs-stat-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Generic section wrapper ─────────────────── */
+.cs-home-section {
+  padding: 72px 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.cs-home-section-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.cs-home-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 10px;
+}
+
+.cs-home-section-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 32px;
+  font-weight: 600;
+  color: #0f172a;
+  letter-spacing: -0.4px;
+}
+
+.cs-home-section-title-left {
+  text-align: left;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.cs-home-section-sub {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 24px;
+  line-height: 1.7;
+}
+
+/* ── Steps ────────────────────────────────────── */
+.cs-home-steps {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  background: #ffffff;
+  border: 1px solid #e5e9f2;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.cs-home-step {
+  flex: 1;
+  padding: 32px 26px;
+  border-right: 1px solid #e5e9f2;
+}
+.cs-home-step:last-child { border-right: none; }
+
+.cs-home-step-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  color: #cbd5e1;
+  font-size: 16px;
+  align-self: center;
+  flex-shrink: 0;
+  display: none; /* hidden — border acts as separator */
+}
+
+.cs-home-step-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-bottom: 18px;
+}
+
+.cs-step-blue   { background: #dbeafe; color: #1d4ed8; }
+.cs-step-amber  { background: #fef3c7; color: #d97706; }
+.cs-step-green  { background: #dcfce7; color: #15803d; }
+.cs-step-teal   { background: #ccfbf1; color: #0d9488; }
+
+.cs-home-step-num {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.cs-home-step-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.cs-home-step-desc {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.65;
+}
+
+/* ── Role Cards ───────────────────────────────── */
+.cs-home-roles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.cs-home-role-card {
+  background: #ffffff;
+  border: 1px solid #e5e9f2;
+  border-radius: 16px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
+}
+.cs-home-role-card:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.cs-role-featured {
+  border: 2px solid #1a56db;
+}
+
+.cs-home-role-featured-pill {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a56db;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 16px;
+  border-radius: 20px;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+
+.cs-home-role-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.cs-home-role-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 23px;
+}
+
+.cs-role-blue   { background: #dbeafe; color: #1d4ed8; }
+.cs-role-amber  { background: #fef3c7; color: #d97706; }
+.cs-role-purple { background: #ede9fe; color: #7c3aed; }
+
+.cs-home-role-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 10px;
+}
+
+.cs-home-role-desc {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.7;
+  margin-bottom: 18px;
+}
+
+.cs-home-role-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  flex: 1;
+}
+
+.cs-home-role-features li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.cs-home-role-features li i {
+  color: #10b981;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.cs-home-role-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.16s ease;
+}
+
+/* ── Badges ───────────────────────────────────── */
+.cs-home-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.cs-badge-blue   { background: #dbeafe; color: #1e40af; }
+.cs-badge-amber  { background: #fef3c7; color: #92400e; }
+.cs-badge-purple { background: #ede9fe; color: #5b21b6; }
+.cs-badge-red    { background: #fee2e2; color: #991b1b; }
+.cs-badge-green  { background: #dcfce7; color: #166534; }
+
+/* ── Two-column layout ────────────────────────── */
+.cs-home-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: start;
+}
+
+/* ── Categories ───────────────────────────────── */
+.cs-home-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.cs-home-cat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #f8f9fc;
+  border: 1px solid #e5e9f2;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #0f172a;
+  transition: border-color 0.15s;
+}
+.cs-home-cat-item:hover { border-color: #1a56db; }
+
+.cs-home-cat-item i {
+  font-size: 20px;
+}
+
+.cs-cat-blue   { color: #1d4ed8; }
+.cs-cat-amber  { color: #d97706; }
+.cs-cat-teal   { color: #0d9488; }
+.cs-cat-red    { color: #dc2626; }
+.cs-cat-green  { color: #15803d; }
+.cs-cat-purple { color: #7c3aed; }
+
+/* ── Priority List ────────────────────────────── */
+.cs-home-priority-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cs-home-priority-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  background: #ffffff;
+  border: 1px solid #e5e9f2;
+  border-radius: 10px;
+  transition: border-color 0.15s;
+}
+.cs-home-priority-item:hover { border-color: #94a3b8; }
+
+.cs-priority-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.cs-dot-high   { background: #ef4444; }
+.cs-dot-medium { background: #f59e0b; }
+.cs-dot-low    { background: #22c55e; }
+
+.cs-home-priority-info { flex: 1; }
+
+.cs-home-priority-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 3px;
+}
+
+.cs-home-priority-desc {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* ── CTA Band ─────────────────────────────────── */
+.cs-home-cta {
+  margin: 0 40px 64px;
+  background: #0f172a;
+  border-radius: 20px;
+  padding: 64px 48px;
+  text-align: center;
+}
+
+.cs-home-cta-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 36px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+  margin-bottom: 14px;
+}
+
+.cs-home-cta-sub {
+  font-size: 16px;
+  color: #94a3b8;
+  line-height: 1.7;
+  margin-bottom: 36px;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cs-home-cta-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.cs-home-cta-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 28px;
+  background: #ffffff;
+  color: #0f172a !important;
+  border: none;
+  border-radius: 9px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.16s ease;
+}
+.cs-home-cta-btn-primary:hover {
+  background: #f1f5f9;
+  transform: translateY(-1px);
+}
+
+.cs-home-cta-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 28px;
+  background: transparent;
+  color: #94a3b8 !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.16s ease;
+}
+.cs-home-cta-btn-ghost:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #e2e8f0 !important;
+}
+
+/* ── Footer ────────────────────────────────────── */
+.cs-home-footer {
+  padding: 24px 40px;
+  border-top: 1px solid #e5e9f2;
+
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 20px;
+}
+
+.cs-home-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-self: start;
+}
+
+.cs-home-footer-copy {
+  margin: 0;
+  font-size: 12px;
+  color: #94a3b8;
+  text-align: center;
+  justify-self: center;
+}
+
+.cs-home-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  justify-self: end;
+}
+
+.cs-home-footer-links a {
+  font-size: 13px;
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.cs-home-footer-links a:hover { color: #1a56db; }
+
+/* ── Responsive ────────────────────────────────── */
+@media (max-width: 900px) {
+  .cs-home-stats        { grid-template-columns: repeat(2, 1fr); }
+  .cs-home-steps        { flex-direction: column; border-radius: 12px; }
+  .cs-home-step         { border-right: none; border-bottom: 1px solid #e5e9f2; }
+  .cs-home-step:last-child { border-bottom: none; }
+  .cs-home-roles        { grid-template-columns: 1fr; }
+  .cs-home-two-col      { grid-template-columns: 1fr; gap: 40px; }
+  .cs-home-hero-title   { font-size: 36px; }
+  .cs-home-cta          { margin: 0 16px 40px; padding: 40px 24px; }
+  .cs-home-footer       { flex-direction: column; align-items: flex-start; gap: 12px; }
+}
+
+@media (max-width: 576px) {
+  .cs-home-nav          { padding: 0 16px; }
+  .cs-home-hero         { padding: 48px 16px 40px; }
+  .cs-home-hero-title   { font-size: 28px; }
+  .cs-home-section      { padding: 48px 16px; }
+  .cs-home-cat-grid     { grid-template-columns: 1fr; }
+  .cs-home-stats        { grid-template-columns: repeat(2, 1fr); }
+  .cs-home-nav-brand span { display: none; }
+}
+
+/* ============================================
+   HOME PAGE — LOGGED-IN ADDITIONS
+   Append these to the bottom of home.scss
+   ============================================ */
+
+/* ── Navbar greeting ────────────────────────── */
+.cs-home-nav-greeting {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+  padding: 7px 14px;
+  background: #f8f9fc;
+  border: 1px solid #e5e9f2;
+  border-radius: 8px;
+
+  i { font-size: 15px; color: #94a3b8; }
+}
+
+/* ── Logged-in user banner ───────────────────── */
+.cs-home-user-banner {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-bottom: 1px solid #1e293b;
+  padding: 28px 40px;
+
+  @media (max-width: 768px) { padding: 20px 16px; }
+}
+
+.cs-home-user-banner-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.cs-home-user-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cs-home-user-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #1a56db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.cs-home-user-welcome {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #475569;
+  margin-bottom: 4px;
+}
+
+.cs-home-user-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+  margin-bottom: 6px;
+}
+
+.cs-home-user-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+
+  &.cs-role-badge--blue   { background: rgba(29,78,216,0.2);  color: #93bbfc; }
+  &.cs-role-badge--amber  { background: rgba(217,119,6,0.2);  color: #fcd34d; }
+  &.cs-role-badge--purple { background: rgba(124,58,237,0.2); color: #c4b5fd; }
+
+  i { font-size: 12px; }
+}
+
+.cs-home-user-banner-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.cs-home-user-dash-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  background: #1a56db;
+  color: #ffffff !important;
+  border: none;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s;
+
+  &:hover {
+    background: #1240a8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(26,86,219,0.35);
+  }
+
+  i { font-size: 14px; }
+}
+
+.cs-home-user-dash-hint {
+  font-size: 11px;
+  color: #475569;
+}
+
+/* ── Recent complaints section ───────────────── */
+.cs-home-recent {
+  background: #f8f9fc;
+  border-bottom: 1px solid #e5e9f2;
+  max-width: 100% !important;
+  padding: 56px 40px !important;
+
+  .cs-home-section-header { margin-bottom: 32px; }
+
+  @media (max-width: 600px) { padding: 40px 16px !important; }
+}
+
+.cs-home-recent-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 48px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.cs-home-recent-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 56px 24px;
+  text-align: center;
+}
+
+.cs-home-recent-empty-icon {
+  font-size: 48px;
+  color: #cbd5e1;
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+.cs-home-recent-empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.cs-home-recent-empty-sub {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+/* ── Recent complaint cards grid ─────────────── */
+.cs-home-recent-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  max-width: 1100px;
+  margin: 0 auto;
+
+  @media (max-width: 900px) { grid-template-columns: 1fr; }
+  @media (max-width: 600px) { grid-template-columns: 1fr; }
+}
+
+.cs-home-recent-card {
+  background: #ffffff;
+  border: 1px solid #e5e9f2;
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: box-shadow 0.15s, transform 0.15s;
+
+  &:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    transform: translateY(-2px);
+  }
+}
+
+.cs-home-recent-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cs-home-recent-id {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.cs-home-recent-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cs-home-recent-desc {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.6;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  flex: 1;
+}
+
+.cs-home-recent-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.cs-home-recent-date {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* ── Status badges ────────────────────────────── */
+.cs-home-recent-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &.cs-status--pending  { background: #fef3c7; color: #92400e; }
+  &.cs-status--progress { background: #dbeafe; color: #1e40af; }
+  &.cs-status--resolved { background: #dcfce7; color: #166534; }
+  &.cs-status--rejected { background: #fee2e2; color: #991b1b; }
+}
+
+/* ── Priority badges ──────────────────────────── */
+.cs-home-recent-priority {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+
+  &.cs-priority--high   { background: #fef2f2; color: #991b1b; }
+  &.cs-priority--medium { background: #fefce8; color: #854d0e; }
+  &.cs-priority--low    { background: #f0fdf4; color: #166534; }
+}
+
+/* ── View all footer ──────────────────────────── */
+.cs-home-recent-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+/* ── Active role card highlight ───────────────── */
+.cs-role-active {
+  border-color: #1a56db !important;
+  box-shadow: 0 0 0 3px rgba(26,86,219,0.08);
+}
+
+/* ── Nav user dropdown ───────────────────────── */
+.cs-home-nav-user {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  border: 1.5px solid #e5e9f2;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #ffffff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  user-select: none;
+
+  &:hover {
+    border-color: #1a56db;
+    box-shadow: 0 0 0 3px rgba(26,86,219,0.08);
+  }
+}
+
+.cs-home-nav-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #1a56db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.cs-home-nav-uname {
+  font-size: 13px;
+  font-weight: 500;
+  color: #0f172a;
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cs-home-nav-chevron {
+  font-size: 11px;
+  color: #94a3b8;
+  transition: transform 0.2s;
+
+  &.open { transform: rotate(180deg); }
+}
+
+.cs-home-nav-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 200px;
+  background: #ffffff;
+  border: 1px solid #e5e9f2;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  z-index: 200;
+  overflow: hidden;
+  animation: cs-dropdown-in 0.15s ease;
+}
+
+@keyframes cs-dropdown-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cs-home-nav-dropdown-header {
+  padding: 14px 16px 12px;
+  background: #f8f9fc;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.cs-home-nav-dropdown-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cs-home-nav-dropdown-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+
+  &.cs-role-badge--blue   { background: #dbeafe; color: #1e40af; }
+  &.cs-role-badge--amber  { background: #fef3c7; color: #92400e; }
+  &.cs-role-badge--purple { background: #ede9fe; color: #5b21b6; }
+
+  i { font-size: 10px; }
+}
+
+.cs-home-nav-dropdown-divider {
+  height: 1px;
+  background: #f1f5f9;
+}
+
+.cs-home-nav-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  text-decoration: none;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  transition: background 0.12s, color 0.12s;
+
+  i { font-size: 14px; color: #94a3b8; }
+
+  &:hover {
+    background: #f8f9fc;
+    color: #0f172a;
+    i { color: #1a56db; }
+  }
+}
+
+.cs-home-nav-dropdown-logout {
+  color: #dc2626;
+  i { color: #dc2626; }
+
+  &:hover {
+    background: #fef2f2;
+    color: #dc2626;
+    i { color: #dc2626; }
+  }
+}
+// stats band
+.cs-home-stat-skeleton {
+  display: inline-block;
+  width: 60px;
+  height: 32px;
+  background: linear-gradient(90deg, #e5e9f2 25%, #f1f5f9 50%, #e5e9f2 75%);
+  background-size: 200% 100%;
+  border-radius: 6px;
+  animation: cs-skeleton-shimmer 1.4s infinite;
+}
+
+@keyframes cs-skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

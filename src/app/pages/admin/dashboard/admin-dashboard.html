@@ -1,0 +1,1194 @@
+<app-toast></app-toast>
+{{ activeView === 'dashboard' ? 'Admin Dashboard' :
+activeView === 'complaints' ? 'All Complaints' :
+activeView === 'citizens' ? 'All Citizens' :
+activeView === 'officers' ? 'All Officers' : 'Create Officer' }}
+<div class="ad-layout">
+
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="ad-sidebar" [class.ad-sidebar--open]="sidebarOpen">
+    <div class="ad-sb-logo">
+      <div class="ad-sb-logo-icon">
+        <i class="bi bi-buildings-fill"></i>
+      </div>
+      <div class="ad-sb-logo-info">
+        <a class="ad-sb-logo-text" routerLink="/">CitySparsh</a>
+        <span class="ad-sb-logo-sub">Admin Portal</span>
+      </div>
+    </div>
+
+    <nav class="ad-sb-nav">
+      <span class="ad-sb-section">Menu</span>
+      <a class="ad-sb-item" [class.active]="activeView === 'dashboard'" (click)="setView('dashboard')">
+        <i class="bi bi-grid-1x2-fill"></i> Dashboard
+      </a>
+      <a class="ad-sb-item" [class.active]="activeView === 'complaints'" (click)="setView('complaints')">
+        <i class="bi bi-chat-left-dots-fill"></i> All Complaints
+      </a>
+      <a class="ad-sb-item" [class.active]="activeView === 'create-officer'" (click)="setView('create-officer')">
+        <i class="bi bi-person-plus-fill"></i> Create Officer
+      </a>
+      <a class="ad-sb-item" [class.active]="activeView === 'citizens'" (click)="setView('citizens')">
+        <i class="bi bi-people-fill"></i> All Citizens
+      </a>
+      <a class="ad-sb-item" [class.active]="activeView === 'officers'" (click)="setView('officers')">
+        <i class="bi bi-shield-fill"></i> All Officers
+      </a>
+
+      <!-- Unassigned badge -->
+      <div class="ad-sb-alert" *ngIf="unassignedCount > 0">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        {{ unassignedCount }} unassigned complaint{{ unassignedCount !== 1 ? 's' : '' }}
+      </div>
+    </nav>
+
+    <div class="ad-sb-footer">
+      <div class="ad-sb-user">
+        <div class="ad-sb-avatar">{{ getInitials() }}</div>
+        <div class="ad-sb-user-info">
+          <span class="ad-sb-uname">{{ username }}</span>
+          <span class="ad-sb-urole">admin</span>
+        </div>
+      </div>
+      <a class="ad-sb-item ad-sb-logout" (click)="logout()">
+        <i class="bi bi-box-arrow-right"></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <div class="ad-sidebar-backdrop" *ngIf="sidebarOpen" (click)="closeSidebar()"></div>
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="ad-main">
+
+    <!-- Topbar -->
+    <div class="ad-topbar">
+      <button class="ad-sb-toggle" (click)="toggleSidebar()">
+        <i class="bi bi-list"></i>
+      </button>
+      <h1 class="ad-topbar-title">
+        {{ activeView === 'dashboard' ? 'Admin Dashboard' : activeView === 'complaints' ? 'All Complaints' : 'Create Officer' }}
+      </h1>
+      <button class="ad-btn-primary" (click)="setView('create-officer')">
+        <i class="bi bi-person-plus-fill"></i>
+        <span class="ad-btn-text">Create Officer</span>   <!-- ← WRAP existing text in this span -->
+      </button>
+    </div>
+
+    <!-- ════════════════ DASHBOARD VIEW ════════════════ -->
+    <div class="ad-body" *ngIf="activeView === 'dashboard'">
+
+      <!-- Welcome -->
+      <div class="ad-welcome">
+        <div class="ad-welcome-blob ad-welcome-blob--tr"></div>
+        <div class="ad-welcome-content">
+          <p class="ad-welcome-label">System Overview</p>
+          <h2 class="ad-welcome-name">{{ username }}</h2>
+          <p class="ad-welcome-sub">
+            <strong>{{ unassignedCount }}</strong>
+            complaint{{ unassignedCount !== 1 ? 's' : '' }} awaiting officer assignment
+          </p>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="ad-stats">
+        <div class="ad-stat-card">
+          <div class="ad-stat-icon ad-stat-icon--blue"><i class="bi bi-clipboard-fill"></i></div>
+          <div><div class="ad-stat-value">{{ total }}</div><div class="ad-stat-label">Total</div></div>
+        </div>
+        <div class="ad-stat-card">
+          <div class="ad-stat-icon ad-stat-icon--amber"><i class="bi bi-clock-fill"></i></div>
+          <div><div class="ad-stat-value">{{ pending }}</div><div class="ad-stat-label">Pending</div></div>
+        </div>
+        <div class="ad-stat-card">
+          <div class="ad-stat-icon ad-stat-icon--indigo"><i class="bi bi-arrow-repeat"></i></div>
+          <div><div class="ad-stat-value">{{ inProgress }}</div><div class="ad-stat-label">In Progress</div></div>
+        </div>
+        <div class="ad-stat-card">
+          <div class="ad-stat-icon ad-stat-icon--green"><i class="bi bi-check-circle-fill"></i></div>
+          <div><div class="ad-stat-value">{{ resolved }}</div><div class="ad-stat-label">Resolved</div></div>
+        </div>
+        <div class="ad-stat-card">
+          <div class="ad-stat-icon ad-stat-icon--red"><i class="bi bi-person-x-fill"></i></div>
+          <div><div class="ad-stat-value">{{ unassignedCount }}</div><div class="ad-stat-label">Unassigned</div></div>
+        </div>
+      </div>
+
+      <!-- full column grid -->
+      <div class="ad-grid-full">
+
+        <!-- Recent complaints cards -->
+        <div class="ad-card">
+          <div class="ad-card-head">
+            <h3 class="ad-card-title">Recent Complaints</h3>
+            <span class="ad-link" (click)="setView('complaints')">
+              View all <i class="bi bi-arrow-right"></i>
+            </span>
+          </div>
+
+          <div *ngIf="loading" class="ad-loading">
+            <div class="spinner-border spinner-border-sm text-primary"></div>
+            <span>Loading…</span>
+          </div>
+
+          <div *ngIf="!loading && recent.length === 0" class="ad-empty">
+            <i class="bi bi-inbox ad-empty-icon"></i>
+            <p class="ad-empty-title">No complaints yet</p>
+          </div>
+
+          <div *ngIf="!loading && recent.length > 0" class="ad-complaint-cards">
+            <div class="ad-complaint-card" *ngFor="let c of recent"
+                 (click)="viewComplaint(c); onSelectAssignComplaint(c.id!)">
+
+              <!-- Attachment image if present -->
+              <div class="ad-complaint-card-img" *ngIf="c.attachmentName && isImage(c.attachmentName)">
+                <img [src]="fileUrl + '/' + getFileNameFromPath(c.attachmentPath)"
+                     [alt]="c.attachmentName"
+                     (error)="onImgError($event)" />
+              </div>
+              <div class="ad-complaint-card-img ad-complaint-card-img--placeholder" *ngIf="!c.attachmentName">
+                <i class="bi bi-file-earmark-text"></i>
+              </div>
+
+              <!-- Card body -->
+              <div class="ad-complaint-card-body">
+
+                <!-- Top row: ID + status -->
+                <div class="ad-complaint-card-top">
+                  <span class="ad-id">#{{ c.id }}</span>
+                  <span class="ad-badge" [ngClass]="getStatusClass(c.status)">
+                   {{ formatStatus(c.status) }}
+                   </span>
+                </div>
+
+                <!-- Title + desc -->
+                <div class="ad-complaint-card-title">{{ c.title }}</div>
+                <div class="ad-complaint-card-desc">{{ c.description }}</div>
+
+                <!-- Meta row -->
+                <div class="ad-complaint-card-meta">
+                  <span class="ad-badge" [ngClass]="getPriorityClass(c.priority)">{{ c.priority }}</span>
+                  <span class="category-pill" *ngIf="c.category">
+                  <i class="bi {{ getCategoryIcon(c.category) }}"></i>
+                 {{ formatCategory(c.category) }}
+                 </span>
+                  <span class="ad-complaint-card-citizen">
+                   <i class="bi bi-person"></i>
+                   {{ c.citizenName || c.citizenEmail || '—' }}
+                 </span>
+                </div>
+
+                <!-- Officer row -->
+                <div class="ad-complaint-card-officer">
+                 <span *ngIf="c.assignedOfficerEmail || c.assignedOfficerName" class="ad-complaint-card-officer-name">
+                 <i class="bi bi-shield-check"></i>
+                   {{ c.assignedOfficerName || c.assignedOfficerEmail }}
+                  </span>
+                  <span *ngIf="!c.assignedOfficerEmail" class="ad-unassigned">
+                   <i class="bi bi-exclamation-circle"></i> Unassigned
+                  </span>
+
+                  <!-- Assign button -->
+                  <button class="ad-assign-btn"
+                          (click)="openAssignModal(c); $event.stopPropagation()">
+                    {{ c.assignedOfficerEmail ? 'Re-assign' : 'Assign' }}
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ════════════ ASSIGN OFFICER MODAL ════════════ -->
+      <div class="ad-modal-backdrop" *ngIf="showAssignModal" (click)="closeAssignModal()">
+        <div class="ad-assign-modal" (click)="$event.stopPropagation()">
+
+          <!-- Header -->
+          <div class="ad-assign-modal-header">
+            <div class="ad-assign-modal-title-row">
+              <div class="ad-assign-modal-icon">
+                <i class="bi bi-person-check-fill"></i>
+              </div>
+              <div>
+                <h3 class="ad-assign-modal-title">
+                  {{ assigningComplaint?.assignedOfficerEmail ? 'Re-assign Officer' : 'Assign Officer' }}
+                </h3>
+                <p class="ad-assign-modal-sub">
+                  Complaint #{{ assigningComplaint?.id }} — {{ assigningComplaint?.title }}
+                </p>
+              </div>
+            </div>
+            <button class="ad-assign-modal-close" (click)="closeAssignModal()">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <!-- Complaint info strip -->
+          <div class="ad-assign-modal-info">
+      <span class="ad-badge" [ngClass]="getPriorityClass(assigningComplaint?.priority)">
+        {{ assigningComplaint?.priority }}
+      </span>
+            <span class="category-pill" *ngIf="assigningComplaint?.category">
+        <i class="bi {{ getCategoryIcon(assigningComplaint?.category) }}"></i>
+        {{ formatCategory(assigningComplaint?.category ?? '') }}
+      </span>
+            <span *ngIf="selectedComplaintCategory" class="ad-assign-dept-tag">
+        <i class="bi bi-building"></i>
+       Needs: {{ formatDepartment(getDeptForCategory(selectedComplaintCategory)) }}
+      </span>
+          </div>
+
+          <!-- Current officer -->
+          <div class="ad-assign-modal-current" *ngIf="assigningComplaint?.assignedOfficerEmail">
+            <span class="ad-assign-current-label">Currently assigned to</span>
+            <span class="ad-assign-current-officer">
+        <i class="bi bi-shield-check"></i>
+        {{ assigningComplaint?.assignedOfficerName || assigningComplaint?.assignedOfficerEmail }}
+      </span>
+          </div>
+
+          <!-- Body -->
+          <div class="ad-assign-modal-body">
+
+            <!-- Officer dropdown -->
+            <div class="ad-field">
+              <label class="ad-field-label">
+                Select Officer
+                <span *ngIf="selectedComplaintCategory"
+                      style="font-size:10px;font-weight:400;color:#7c3aed;margin-left:6px">
+            <i class="bi bi-filter"></i>
+            Filtered for {{ formatCategory(selectedComplaintCategory) }}
+          </span>
+              </label>
+
+              <div *ngIf="loadingOfficers"
+                   style="display:flex;align-items:center;gap:8px;padding:10px 12px;
+                    border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;color:#64748b">
+                <div class="spinner-border spinner-border-sm text-primary"></div>
+                Loading eligible officers…
+              </div>
+
+              <select *ngIf="!loadingOfficers" class="ad-select"
+                      [(ngModel)]="assignOfficerId" name="assignOfficerIdModal">
+                <option [ngValue]="null">
+                  — {{ eligibleOfficers.length > 0 ? 'Select officer' : 'No eligible officers' }} —
+                </option>
+                <option *ngFor="let o of eligibleOfficers" [ngValue]="o.id">
+                  {{ o.name || (o.firstName + ' ' + o.lastName) }}
+                  ({{ formatDepartment(o.department) }})
+                </option>
+              </select>
+
+              <!-- No officers warning -->
+              <div *ngIf="!loadingOfficers && eligibleOfficers.length === 0 && selectedComplaintCategory"
+                   class="ad-assign-no-officers">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                No officers from required department available.
+                <span class="ad-assign-show-all" (click)="eligibleOfficers = officers">
+            Show all officers
+          </span>
+              </div>
+            </div>
+
+            <!-- Status update -->
+            <div class="ad-field">
+              <label class="ad-field-label">
+                Update Status <span class="ad-optional">(optional)</span>
+              </label>
+              <select class="ad-select" [(ngModel)]="assignStatus" name="assignStatusModal">
+                <option value="">— Keep current —</option>
+                <option *ngFor="let s of statusOptions" [ngValue]="s">{{ formatStatus(s) }}</option>
+              </select>
+            </div>
+
+          </div>
+
+          <!-- Footer -->
+          <div class="ad-assign-modal-footer">
+            <button class="ad-btn-ghost" (click)="closeAssignModal()">Cancel</button>
+            <button class="ad-action-btn ad-action-btn--purple ad-assign-modal-submit"
+                    (click)="$event.stopPropagation(); assignOfficer()" [disabled]="savingAssign || !assignOfficerId">
+              <span *ngIf="savingAssign" class="spinner-border spinner-border-sm"></span>
+              <ng-container *ngIf="!savingAssign">
+                <i class="bi bi-person-check-fill"></i>
+                {{ assigningComplaint?.assignedOfficerEmail ? 'Re-assign' : 'Assign Officer' }}
+              </ng-container>
+              <ng-container *ngIf="savingAssign">Assigning…</ng-container>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- ════════════════ ALL COMPLAINTS VIEW ════════════════ -->
+    <div class="ad-body" *ngIf="activeView === 'complaints'">
+
+      <div class="ad-card ad-filter-bar">
+        <div class="ad-filter-inner">
+
+          <div class="ad-search-wrap">
+            <i class="bi bi-search ad-search-icon"></i>
+            <input class="ad-search-input" type="text" [(ngModel)]="searchText"
+                   placeholder="Search by title or citizen…">
+          </div>
+
+          <div class="ad-filter-tabs">
+            <button class="ad-filter-tab" [class.active]="filterStatus === ''"           (click)="filterStatus = ''">All</button>
+            <button class="ad-filter-tab" [class.active]="filterStatus === 'PENDING'"    (click)="filterStatus = 'PENDING'">Pending</button>
+            <button class="ad-filter-tab" [class.active]="filterStatus === 'IN_PROGRESS'"(click)="filterStatus = 'IN_PROGRESS'">In Progress</button>
+            <button class="ad-filter-tab" [class.active]="filterStatus === 'RESOLVED'"   (click)="filterStatus = 'RESOLVED'">Resolved</button>
+            <button class="ad-filter-tab" [class.active]="filterStatus === 'REJECTED'"   (click)="filterStatus = 'REJECTED'">Rejected</button>
+          </div>
+
+          <!-- Category -->
+          <div class="ad-filter-select-wrap">
+            <i class="bi bi-tag ad-filter-select-icon"></i>
+            <select class="ad-filter-select" [(ngModel)]="filterCategory">
+              <option value="">All Categories</option>
+              <option *ngFor="let cat of categoryOptions" [value]="cat">{{ formatCategory(cat) }}</option>
+            </select>
+            <i class="bi bi-chevron-down ad-filter-select-chevron"></i>
+          </div>
+
+          <!-- Zone -->
+          <div class="ad-filter-select-wrap">
+            <i class="bi bi-map ad-filter-select-icon"></i>
+            <select class="ad-filter-select" [(ngModel)]="filterZone"
+                    (ngModelChange)="onComplaintZoneFilterChange($event)">
+              <option value="">All Zones</option>
+              <option *ngFor="let z of bangaloreZones" [value]="z">{{ z }}</option>
+            </select>
+            <i class="bi bi-chevron-down ad-filter-select-chevron"></i>
+          </div>
+
+          <!-- Ward — shows only when zone selected -->
+          <div class="ad-filter-select-wrap" *ngIf="filterZone">
+            <i class="bi bi-geo-alt ad-filter-select-icon"></i>
+            <select class="ad-filter-select" [(ngModel)]="filterWard">
+              <option value="">All Wards</option>
+              <option *ngFor="let w of wardsForComplaintFilter" [value]="w.wardName">
+                #{{ w.wardNumber }} {{ w.wardName }}
+              </option>
+            </select>
+            <i class="bi bi-chevron-down ad-filter-select-chevron"></i>
+          </div>
+
+          <!-- Sort -->
+          <div class="ad-filter-select-wrap">
+            <i class="bi bi-sort-down ad-filter-select-icon"></i>
+            <select class="ad-filter-select" [(ngModel)]="sortBy">
+              <option value="date-desc">Newest First</option>
+              <option value="date-asc">Oldest First</option>
+              <option value="priority-high">Priority: High → Low</option>
+              <option value="priority-low">Priority: Low → High</option>
+            </select>
+            <i class="bi bi-chevron-down ad-filter-select-chevron"></i>
+          </div>
+
+          <!-- Clear -->
+          <button class="ad-officers-clear-btn"
+                  *ngIf="filterStatus || filterCategory || searchText || filterZone || filterWard"
+                  (click)="clearFilters()">
+            <i class="bi bi-x-circle"></i> Clear
+          </button>
+
+          <span class="ad-count">{{ filtered.length }} complaint{{ filtered.length !== 1 ? 's' : '' }}</span>
+        </div>
+
+        <!-- Active filter chips -->
+        <div class="ad-officers-chips" style="padding: 0 16px 12px"
+             *ngIf="filterZone || filterWard || filterCategory">
+        <span class="ad-filter-chip" *ngIf="filterCategory">
+         <i class="bi bi-tag"></i> {{ formatCategory(filterCategory) }}
+          <button (click)="filterCategory=''"><i class="bi bi-x"></i></button>
+         </span>
+          <span class="ad-filter-chip" *ngIf="filterZone">
+         <i class="bi bi-map"></i> {{ filterZone }} Zone
+         <button (click)="filterZone=''; filterWard=''; wardsForComplaintFilter=[]">
+           <i class="bi bi-x"></i>
+         </button>
+         </span>
+          <span class="ad-filter-chip ad-filter-chip--green" *ngIf="filterWard">
+         <i class="bi bi-geo-alt-fill"></i> {{ filterWard }}
+          <button (click)="filterWard=''"><i class="bi bi-x"></i></button>
+           </span>
+        </div>
+      </div>
+
+      <div class="ad-grid-full">
+        <!-- Full complaints table -->
+        <div class="ad-card">
+          <div *ngIf="loading" class="ad-loading">
+            <div class="spinner-border spinner-border-sm text-primary"></div>
+            <span>Loading…</span>
+          </div>
+          <div *ngIf="!loading && filtered.length === 0" class="ad-empty">
+            <i class="bi bi-inbox ad-empty-icon"></i>
+            <p class="ad-empty-title">No complaints found</p>
+          </div>
+          <div *ngIf="!loading && filtered.length > 0" class="ad-table-wrap">
+            <table class="ad-table">
+              <thead>
+              <tr>
+                <th>#ID</th><th>Title</th><th>Priority</th>
+                <th>Status</th><th>Category</th><th>Location</th><th>Zone</th><th>Ward</th><th>Citizen</th><th>Officer</th><th>Date</th><th>Attachments</th><th></th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let c of filtered" class="ad-table-row"
+                  (click)="viewComplaint(c)">
+                <td class="ad-id">#{{ c.id }}</td>
+                <td>
+                  <div class="ad-complaint-title">{{ c.title }}</div>
+                  <div class="ad-complaint-desc">{{ c.description }}</div>
+                </td>
+                <td><span class="ad-badge" [ngClass]="getPriorityClass(c.priority)">{{ c.priority }}</span></td>
+                <td><span class="ad-badge" [ngClass]="getStatusClass(c.status)">{{ formatStatus(c.status) }}</span></td>
+                <td><span class="ad-badge" >{{  formatCategory(c.category) }}</span></td>
+                <td>
+                  <div class="ad-location">
+                    <a *ngIf="c.latitude && c.longitude"
+                       [href]="'https://www.google.com/maps?q=' + c.latitude + ',' + c.longitude"
+                       target="_blank"
+                       class="ad-location-link"
+                       (click)="$event.stopPropagation()"
+                       [title]="c.address || 'View on map'">
+                      <i class="bi bi-geo-alt-fill"></i>
+                      <span class="ad-location-text">{{ c.address || 'View location' }}</span>
+                      <i class="bi bi-box-arrow-up-right ad-location-ext"></i>
+                    </a>
+                    <span *ngIf="!c.latitude && !c.longitude" class="ad-muted">—</span>
+                  </div>
+                </td>
+                <td>
+                  <!-- Zone display -->
+                  <div *ngIf="c.zone" style="display:flex;align-items:center;gap:5px;font-size:12px;color:#d97706">
+                    <i class="bi bi-map"></i> {{ c.zone }} zone
+                  </div>
+                  <span *ngIf="!c.zone" class="ad-muted">—</span>
+                </td>
+                <td>
+                  <!-- Ward display -->
+                  <div *ngIf="c.wardName" style="display:flex;align-items:center;gap:5px;font-size:12px;color:#166534">
+                    <i class="bi bi-geo-alt-fill"></i> {{ c.wardName }}
+                  </div>
+                  <span *ngIf="!c.wardName" class="ad-muted">—</span>
+                </td>
+                <td class="ad-muted ad-cell-truncate" >{{ c.citizenName || c.citizenEmail || '—' }}</td>
+                <td class="ad-cell-truncate">
+                    <span *ngIf="c.assignedOfficerEmail" class="ad-muted">
+                      {{ c.assignedOfficerName || c.assignedOfficerEmail }}
+
+                    </span>
+                  <span *ngIf="!c.assignedOfficerEmail" class="ad-unassigned">
+                      <i class="bi bi-exclamation-circle"></i> Unassigned
+                    </span>
+                </td>
+                <td class="ad-muted ad-nowrap">{{ formatDate(c.createdAt) }}</td>
+                <td>
+                  <!-- Attachment link -->
+                  <a *ngIf="c.attachmentName"
+                     [href]="fileUrl + '/' + getFileNameFromPath(c.attachmentPath)"
+                     target="_blank"
+                     class="attachment-link"
+                     (click)="$event.stopPropagation()">
+                    <i class="bi bi-paperclip"></i> {{ c.attachmentName }}
+                  </a>
+                </td>
+                <td>
+                  <button class="ad-assign-btn"
+                          (click)="openManageModal(c); $event.stopPropagation()">
+                    Manage
+                  </button>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ════════════ MANAGE COMPLAINT MODAL ════════════ -->
+      <div class="ad-modal-backdrop" *ngIf="showManageModal" (click)="closeManageModal()">
+        <div class="ad-manage-modal" (click)="$event.stopPropagation()">
+
+          <!-- Header -->
+          <div class="ad-assign-modal-header">
+            <div class="ad-assign-modal-title-row">
+              <div class="ad-assign-modal-icon" style="background:rgba(26,86,219,0.1)">
+                <i class="bi bi-pencil-fill" style="color:#1a56db"></i>
+              </div>
+              <div>
+                <h3 class="ad-assign-modal-title">Manage Complaint</h3>
+                <p class="ad-assign-modal-sub">
+                  #{{ managingComplaint?.id }} — {{ managingComplaint?.title }}
+                </p>
+              </div>
+            </div>
+            <button class="ad-assign-modal-close" (click)="closeManageModal()">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <!-- Complaint info strip -->
+          <div class="ad-assign-modal-info">
+      <span class="ad-badge" [ngClass]="getStatusClass(managingComplaint?.status)">
+        {{ formatStatus(managingComplaint?.status) }}
+      </span>
+            <span class="ad-badge" [ngClass]="getPriorityClass(managingComplaint?.priority)">
+        {{ managingComplaint?.priority }}
+      </span>
+            <span class="category-pill" *ngIf="managingComplaint?.category">
+        <i class="bi {{ getCategoryIcon(managingComplaint?.category ?? '') }}"></i>
+        {{ formatCategory(managingComplaint?.category ?? '') }}
+      </span>
+          </div>
+
+          <div class="ad-manage-modal-body">
+
+            <!-- ── ASSIGN OFFICER SECTION ── -->
+            <div class="ad-manage-section">
+              <div class="ad-manage-section-title">
+                <i class="bi bi-person-check-fill" style="color:#7c3aed"></i>
+                Assign Officer
+                <span *ngIf="managingComplaint?.assignedOfficerEmail"
+                      class="ad-manage-current-tag">
+            Currently: {{ managingComplaint?.assignedOfficerName
+                       || managingComplaint?.assignedOfficerEmail }}
+          </span>
+              </div>
+
+              <div class="ad-field">
+                <label class="ad-field-label">
+                  Officer
+                  <span *ngIf="selectedComplaintCategory"
+                        style="font-size:10px;font-weight:400;color:#7c3aed;margin-left:6px">
+              <i class="bi bi-filter"></i>
+              Filtered for {{ formatCategory(selectedComplaintCategory) }}
+            </span>
+                </label>
+
+                <div *ngIf="loadingOfficers"
+                     style="display:flex;align-items:center;gap:8px;padding:10px 12px;
+                      border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;color:#64748b">
+                  <div class="spinner-border spinner-border-sm text-primary"></div>
+                  Loading eligible officers…
+                </div>
+
+                <select *ngIf="!loadingOfficers" class="ad-select"
+                        [(ngModel)]="assignOfficerId" name="assignOfficerIdManage">
+                  <option [ngValue]="null">
+                    — {{ eligibleOfficers.length > 0 ? 'Select officer' : 'No eligible officers' }} —
+                  </option>
+                  <option *ngFor="let o of eligibleOfficers" [ngValue]="o.id">
+                    {{ o.name || (o.firstName + ' ' + o.lastName) }}
+                    ({{ formatDepartment(o.department) }})
+                  </option>
+                </select>
+
+                <div *ngIf="!loadingOfficers && eligibleOfficers.length === 0 && selectedComplaintCategory"
+                     class="ad-assign-no-officers">
+                  <i class="bi bi-exclamation-triangle-fill"></i>
+                  No officers from required department available.
+                  <span class="ad-assign-show-all" (click)="eligibleOfficers = officers">
+              Show all
+            </span>
+                </div>
+              </div>
+
+              <button class="ad-action-btn ad-action-btn--purple"
+                      style="height:38px"
+                      (click)="assignOfficer()" [disabled]="savingAssign || !assignOfficerId">
+                <span *ngIf="savingAssign" class="spinner-border spinner-border-sm"></span>
+                <ng-container *ngIf="!savingAssign">
+                  <i class="bi bi-person-check-fill"></i>
+                  {{ managingComplaint?.assignedOfficerEmail ? 'Re-assign' : 'Assign' }}
+                </ng-container>
+                <ng-container *ngIf="savingAssign">Assigning…</ng-container>
+              </button>
+            </div>
+
+            <div class="ad-manage-divider"></div>
+
+            <!-- ── UPDATE STATUS SECTION ── -->
+            <div class="ad-manage-section">
+              <div class="ad-manage-section-title">
+                <i class="bi bi-arrow-repeat" style="color:#1a56db"></i>
+                Update Status
+              </div>
+
+              <div class="ad-field">
+                <label class="ad-field-label">Status</label>
+                <select class="ad-select" [(ngModel)]="updateStatus" name="updateStatusManage">
+                  <option *ngFor="let s of statusOptions" [value]="s">{{ formatStatus(s) }}</option>
+                </select>
+              </div>
+
+              <div class="ad-field">
+                <label class="ad-field-label">Resolution Note</label>
+                <textarea class="ad-textarea" [(ngModel)]="updateComment"
+                          name="updateCommentManage" rows="3"
+                          placeholder="Add resolution comments…"></textarea>
+              </div>
+
+              <button class="ad-action-btn ad-action-btn--blue"
+                      style="height:38px"
+                      (click)="updateComplaint()" [disabled]="savingUpdate">
+                <span *ngIf="savingUpdate" class="spinner-border spinner-border-sm"></span>
+                <ng-container *ngIf="!savingUpdate">
+                  <i class="bi bi-floppy-fill"></i> Save Update
+                </ng-container>
+                <ng-container *ngIf="savingUpdate">Saving…</ng-container>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Footer -->
+          <div class="ad-assign-modal-footer">
+            <button class="ad-btn-ghost" (click)="closeManageModal()">Close</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ CREATE OFFICER VIEW ════════════════ -->
+    <div class="ad-body" *ngIf="activeView === 'create-officer'">
+      <div class="ad-create-wrap">
+
+        <!-- Page header -->
+        <div class="ad-create-header">
+          <div class="ad-create-header-icon">
+            <i class="bi bi-person-plus-fill"></i>
+          </div>
+          <div>
+            <h2 class="ad-create-header-title">Create Officer Account</h2>
+            <p class="ad-create-header-sub">Add a new officer to the CitySparsh system</p>
+          </div>
+        </div>
+
+        <div class="ad-card">
+
+          <!-- Info banner -->
+          <div class="ad-create-banner">
+            <div class="ad-create-banner-icon">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <div>
+              <div class="ad-create-banner-title">Officer Permissions</div>
+              <div class="ad-create-banner-sub">
+                Officers can view and update complaints assigned to them.
+                Share credentials securely after creation.
+              </div>
+            </div>
+          </div>
+
+          <div class="ad-panel">
+
+            <!-- Name row -->
+            <div class="ad-create-row">
+              <div class="ad-field">
+                <label class="ad-field-label">
+                  First Name <span class="ad-required">*</span>
+                </label>
+                <div class="ad-input-wrap">
+                  <i class="bi bi-person ad-input-icon"></i>
+                  <input class="ad-input ad-input--icon" type="text"
+                         [(ngModel)]="newOfficerFirstName"
+                         name="officerFirstName"
+                         placeholder="First name">
+                </div>
+              </div>
+              <div class="ad-field">
+                <label class="ad-field-label">
+                  Last Name <span class="ad-required">*</span>
+                </label>
+                <div class="ad-input-wrap">
+                  <i class="bi bi-person ad-input-icon"></i>
+                  <input class="ad-input ad-input--icon" type="text"
+                         [(ngModel)]="newOfficerLastName"
+                         name="officerLastName"
+                         placeholder="Last name">
+                </div>
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="ad-field">
+              <label class="ad-field-label">
+                Email Address <span class="ad-required">*</span>
+              </label>
+              <div class="ad-input-wrap">
+                <i class="bi bi-envelope ad-input-icon"></i>
+                <input class="ad-input ad-input--icon" type="email"
+                       [(ngModel)]="newOfficerEmail"
+                       name="officerEmail"
+                       placeholder="officer@citysparsh.gov">
+              </div>
+            </div>
+
+            <!-- Department -->
+            <div class="ad-field">
+              <label class="ad-field-label">
+                Department <span class="ad-required">*</span>
+              </label>
+              <div class="ad-input-wrap">
+                <i class="bi bi-building ad-input-icon"></i>
+                <select
+                  class="ad-input ad-input--icon"
+                  [(ngModel)]="newOfficerDepartment"
+                  name="officerDepartment"
+                  required>
+                  <option value="" disabled>
+                    Select department
+                  </option>
+                  <option
+                    *ngFor="let department of departmentOptions"
+                    [value]="department">
+                    {{ formatDepartment(department) }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Zone -->
+            <div class="ad-field">
+              <label class="ad-field-label">
+                Zone <span class="ad-required">*</span>
+              </label>
+              <div class="ad-input-wrap">
+                <i class="bi bi-map ad-input-icon"></i>
+                <select class="ad-input ad-input--icon"
+                        [(ngModel)]="newOfficerZone"
+                        name="officerZone"
+                        (ngModelChange)="onZoneChange($event)">
+                  <option value="" disabled>Select zone…</option>
+                  <option *ngFor="let z of bangaloreZones" [value]="z">{{ z }}</option>
+                </select>
+              </div>
+              <span class="ad-field-hint">
+                  <i class="bi bi-info-circle"></i>
+                   Officer covers all wards in this zone by default
+              </span>
+            </div>
+
+            <!-- Ward — specific assignment -->
+            <div class="ad-field" *ngIf="newOfficerZone">
+              <label class="ad-field-label">
+                Specific Ward
+                <span class="ad-optional">(optional — more precise)</span>
+              </label>
+              <div class="ad-input-wrap">
+                <i class="bi bi-geo-alt ad-input-icon"></i>
+                <select class="ad-input ad-input--icon"
+                        [(ngModel)]="newOfficerWardId"
+                        name="officerWard">
+                  <option [ngValue]="null">— All wards in zone —</option>
+                  <option *ngFor="let w of wardsInZone" [ngValue]="w.id">
+                    #{{ w.wardNumber }} — {{ w.wardName }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div class="ad-field">
+              <label class="ad-field-label">
+                Temporary Password <span class="ad-required">*</span>
+              </label>
+              <div class="ad-input-wrap">
+                <i class="bi bi-lock ad-input-icon"></i>
+                <input class="ad-input ad-input--icon ad-input--password"
+                       [type]="showNewPassword ? 'text' : 'password'"
+                       [(ngModel)]="newOfficerPassword"
+                       name="officerPassword"
+                       placeholder="Min. 6 characters">
+                <button type="button" class="ad-eye-btn" (click)="showNewPassword = !showNewPassword">
+                  <i class="bi" [class.bi-eye]="!showNewPassword" [class.bi-eye-slash]="showNewPassword"></i>
+                </button>
+              </div>
+              <span class="ad-field-hint">
+            <i class="bi bi-info-circle"></i>
+            Officer must change this password after first login
+          </span>
+            </div>
+
+            <!-- Divider -->
+            <div class="ad-create-divider"></div>
+
+            <!-- Actions -->
+            <div class="ad-create-actions">
+              <button class="ad-btn-ghost" (click)="newOfficerFirstName=''; newOfficerLastName=''; newOfficerEmail=''; newOfficerPassword=''">
+                <i class="bi bi-x-lg"></i> Clear
+              </button>
+              <button class="ad-action-btn ad-action-btn--green ad-create-submit"
+                      (click)="createOfficer()" [disabled]="creating">
+                <span *ngIf="creating" class="spinner-border spinner-border-sm"></span>
+                <ng-container *ngIf="!creating">
+                  <i class="bi bi-person-plus-fill"></i> Create Officer Account
+                </ng-container>
+                <ng-container *ngIf="creating">Creating…</ng-container>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ CITIZENS VIEW ════════════════ -->
+    <div class="ad-body" *ngIf="activeView === 'citizens'">
+
+      <div class="ad-stats ad-stats--mini">
+        <div class="ad-stat-card">
+          <div class="ad-stat-icon ad-stat-icon--blue"><i class="bi bi-people-fill"></i></div>
+          <div><div class="ad-stat-value">{{ citizens.length }}</div><div class="ad-stat-label">Total Citizens</div></div>
+        </div>
+        <div class="ad-stat-card">
+          <div class="ad-stat-icon ad-stat-icon--indigo"><i class="bi bi-chat-left-dots-fill"></i></div>
+          <div><div class="ad-stat-value">{{ citizensWithComplaints }}</div><div class="ad-stat-label">Have Filed Complaints</div></div>
+        </div>
+      </div>
+
+      <div class="ad-card">
+        <div class="ad-card-head">
+          <h3 class="ad-card-title">All Citizens</h3>
+          <span class="ad-count">{{ filteredCitizens.length }} citizen{{ filteredCitizens.length !== 1 ? 's' : '' }}</span>
+        </div>
+
+        <div class="ad-filter-bar" style="padding: 12px 18px; border-bottom: 1px solid #f1f5f9;">
+          <div class="ad-search-wrap">
+            <i class="bi bi-search ad-search-icon"></i>
+            <input class="ad-search-input" type="text" [(ngModel)]="citizenSearch"
+                   placeholder="Search by name or email…">
+          </div>
+        </div>
+
+        <div *ngIf="loadingUsers" class="ad-loading">
+          <div class="spinner-border spinner-border-sm text-primary"></div><span>Loading…</span>
+        </div>
+        <div *ngIf="!loadingUsers && filteredCitizens.length === 0" class="ad-empty">
+          <i class="bi bi-people ad-empty-icon"></i><p class="ad-empty-title">No citizens found</p>
+        </div>
+
+        <div *ngIf="!loadingUsers && filteredCitizens.length > 0" class="ad-table-wrap">
+          <table class="ad-table">
+            <thead>
+            <tr><th>#ID</th><th>Name</th><th>Email</th><th>Complaints</th></tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let u of filteredCitizens" class="ad-table-row">
+              <td class="ad-id">#{{ u.id }}</td>
+              <td>
+                <div class="ad-user-cell">
+                  <div class="ad-user-avatar ad-user-avatar--blue">{{ getNameInitials(u.firstName, u.lastName) }}</div>
+                  <div class="ad-complaint-title">{{ u.firstName }} {{ u.lastName }}</div>
+                </div>
+              </td>
+              <td class="ad-muted">{{ u.email }}</td>
+              <td>
+                <span class="ad-badge ad-badge--progress" *ngIf="(u.complaintCount ?? 0) > 0">{{ u.complaintCount }}</span>
+                <span class="ad-muted" *ngIf="!(u.complaintCount > 0)">—</span>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ OFFICERS VIEW ════════════════ -->
+    <div class="ad-body" *ngIf="activeView === 'officers'">
+
+      <div class="ad-stats ad-stats--mini">
+        <div class="ad-stat-card">
+          <div class="ad-stat-icon ad-stat-icon--indigo"><i class="bi bi-shield-fill"></i></div>
+          <div><div class="ad-stat-value">{{ officers.length }}</div><div class="ad-stat-label">Total Officers</div></div>
+        </div>
+        <div class="ad-stat-card">
+          <div class="ad-stat-icon ad-stat-icon--green"><i class="bi bi-person-check-fill"></i></div>
+          <div><div class="ad-stat-value">{{ officersActive }}</div><div class="ad-stat-label">With Active Cases</div></div>
+        </div>
+        <div class="ad-stat-card">
+          <div class="ad-stat-icon ad-stat-icon--amber"><i class="bi bi-building"></i></div>
+          <div><div class="ad-stat-value">{{ officerDepartmentCount }}</div><div class="ad-stat-label">Departments Covered</div></div>
+        </div>
+      </div>
+
+      <div class="ad-card">
+        <div class="ad-card-head">
+          <h3 class="ad-card-title">All Officers</h3>
+          <span class="ad-count">{{ filteredOfficers.length }} officer{{ filteredOfficers.length !== 1 ? 's' : '' }}</span>
+        </div>
+
+        <div class="ad-officers-filter-bar">
+
+          <!-- Row 1: Search + filters -->
+          <div class="ad-officers-filter-row">
+
+            <!-- Search -->
+            <div class="ad-search-wrap">
+              <i class="bi bi-search ad-search-icon"></i>
+              <input class="ad-search-input" type="text" [(ngModel)]="officerSearch"
+                     placeholder="Search by name or email…">
+              <button *ngIf="officerSearch" class="ad-search-clear" (click)="officerSearch=''">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+
+            <!-- Department filter -->
+            <div class="ad-filter-select-wrap">
+              <i class="bi bi-building ad-filter-select-icon"></i>
+              <select class="ad-filter-select" [(ngModel)]="officerDeptFilter">
+                <option value="">All Departments</option>
+                <option *ngFor="let d of departmentOptions" [value]="d">
+                  {{ formatDepartment(d) }}
+                </option>
+              </select>
+              <i class="bi bi-chevron-down ad-filter-select-chevron"></i>
+            </div>
+
+            <!-- Zone filter -->
+            <div class="ad-filter-select-wrap">
+              <i class="bi bi-map ad-filter-select-icon"></i>
+              <select class="ad-filter-select" [(ngModel)]="officerZoneFilter"
+                      (ngModelChange)="onOfficerZoneFilterChange($event)">
+                <option value="">All Zones</option>
+                <option *ngFor="let z of bangaloreZones" [value]="z">{{ z }}</option>
+              </select>
+              <i class="bi bi-chevron-down ad-filter-select-chevron"></i>
+            </div>
+
+            <!-- Ward filter -->
+            <div class="ad-filter-select-wrap" *ngIf="officerZoneFilter">
+              <i class="bi bi-geo-alt ad-filter-select-icon"></i>
+              <select class="ad-filter-select" [(ngModel)]="officerWardFilter">
+                <option value="">All Wards</option>
+                <option *ngFor="let w of wardsForOfficerFilter" [value]="w.wardName">
+                  #{{ w.wardNumber }} {{ w.wardName }}
+                </option>
+              </select>
+              <i class="bi bi-chevron-down ad-filter-select-chevron"></i>
+            </div>
+
+            <!-- Clear -->
+            <button class="ad-officers-clear-btn"
+                    *ngIf="officerSearch || officerDeptFilter || officerZoneFilter || officerWardFilter"
+                    (click)="clearOfficerFilters()">
+              <i class="bi bi-x-circle"></i> Clear filters
+            </button>
+
+            <span class="ad-count" style="margin-left:auto;white-space:nowrap">
+      {{ filteredOfficers.length }} officer{{ filteredOfficers.length !== 1 ? 's' : '' }}
+    </span>
+          </div>
+
+          <!-- Row 2: Active chips -->
+          <div class="ad-officers-chips"
+               *ngIf="officerDeptFilter || officerZoneFilter || officerWardFilter">
+    <span class="ad-filter-chip" *ngIf="officerDeptFilter">
+      <i class="bi bi-building"></i> {{ formatDepartment(officerDeptFilter) }}
+      <button (click)="officerDeptFilter=''"><i class="bi bi-x"></i></button>
+    </span>
+            <span class="ad-filter-chip" *ngIf="officerZoneFilter">
+      <i class="bi bi-map"></i> {{ officerZoneFilter }} Zone
+      <button (click)="officerZoneFilter=''; officerWardFilter=''; wardsForOfficerFilter=[]">
+        <i class="bi bi-x"></i>
+      </button>
+    </span>
+            <span class="ad-filter-chip ad-filter-chip--green" *ngIf="officerWardFilter">
+      <i class="bi bi-geo-alt-fill"></i> {{ officerWardFilter }}
+      <button (click)="officerWardFilter=''"><i class="bi bi-x"></i></button>
+    </span>
+          </div>
+
+
+        </div>
+        <div *ngIf="loadingUsers" class="ad-loading">
+          <div class="spinner-border spinner-border-sm text-primary"></div><span>Loading…</span>
+        </div>
+        <div *ngIf="!loadingUsers && filteredOfficers.length === 0" class="ad-empty">
+          <i class="bi bi-shield ad-empty-icon"></i><p class="ad-empty-title">No officers found</p>
+        </div>
+
+        <div *ngIf="!loadingUsers && filteredOfficers.length > 0" class="ad-table-wrap">
+          <table class="ad-table">
+            <thead>
+            <tr><th>#ID</th><th>Name</th><th>Email</th><th>Department</th><th>Zone</th><th>Ward</th><th>Assigned Cases</th></tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let o of filteredOfficers" class="ad-table-row">
+              <td class="ad-id">#{{ o.id }}</td>
+              <td>
+                <div class="ad-user-cell">
+                  <div class="ad-complaint-title">{{ o.firstName }} {{ o.lastName }}</div>
+                </div>
+              </td>
+              <td class="ad-muted">{{ o.email }}</td>
+              <td class="ad-muted bi {{ getDepartmentIcon(o.department) }}">{{ formatDepartment(o.department) }}</td>
+              <td>
+                <!-- Zone display -->
+                <div *ngIf="o.zone" style="display:flex;align-items:center;gap:5px;font-size:12px;color:#d97706">
+                  <i class="bi bi-map"></i> {{ o.zone }} zone
+                </div>
+                <span *ngIf="!o.zone" class="ad-muted">—</span>
+              </td>
+              <td>
+                <!-- Ward display -->
+                <div *ngIf="o.wardName" style="display:flex;align-items:center;gap:5px;font-size:12px;color:#166534">
+                  <i class="bi bi-geo-alt-fill"></i> {{ o.wardName }}
+                </div>
+                <span *ngIf="!o.wardName" class="ad-muted">—</span>
+              </td>
+              <td class="ad-muted">{{ o.assignedCount ?? '—' }}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ════════════════ Complaint pop up Card ════════════════ -->
+    <div class="ad-modal-backdrop" *ngIf="showDetailModal" (click)="closeDetailModal()">
+      <div class="ad-modal ad-modal--detail" (click)="$event.stopPropagation()" *ngIf="selectedComplaint as c">
+
+        <!-- Hero header -->
+        <div class="ad-modal-hero" [ngClass]="getStatusClass(c.status)">
+          <button class="ad-modal-close" (click)="closeDetailModal()">&times;</button>
+          <div class="ad-modal-hero-top">
+            <span class="ad-id-lg">#{{ c.id }}</span>
+            <span class="ad-badge" [ngClass]="getStatusClass(c.status)">{{ formatStatus(c.status) }}</span>
+            <span class="ad-badge" [ngClass]="getPriorityClass(c.priority)">{{ c.priority }} priority</span>
+          </div>
+          <h2 class="ad-modal-hero-title">{{ c.title }}</h2>
+          <span class="category-pill" *ngIf="c.category">
+        <i class="bi {{ getCategoryIcon(c.category) }}"></i> {{ formatCategory(c.category) }}
+      </span>
+        </div>
+
+        <!-- Attachment image preview -->
+        <div class="ad-modal-attachment" *ngIf="c.attachmentName && isImage(c.attachmentName)">
+          <img [src]="fileUrl + '/' + getFileNameFromPath(c.attachmentPath)"
+               [alt]="c.attachmentName" (error)="onImgError($event)">
+        </div>
+
+        <div class="ad-modal-body">
+
+          <div class="ad-detail-section">
+            <h4 class="ad-detail-section-title"><i class="bi bi-file-text"></i> Description</h4>
+            <p class="ad-detail-desc">{{ c.description }}</p>
+          </div>
+
+          <div class="ad-detail-grid">
+            <div class="ad-detail-block ad-detail-block--location" *ngIf="c.address">
+              <span class="ad-detail-block-label">
+              <i class="bi bi-geo-alt-fill"></i>
+                Location
+                </span>
+
+
+              <a
+                *ngIf="c.latitude != null && c.longitude != null"
+                [href]="'https://www.google.com/maps?q=' + c.latitude + ',' + c.longitude"
+                target="_blank"
+                class="ad-detail-block-value ad-detail-block-value--link"
+                (click)="$event.stopPropagation()"
+                [title]="c.address"
+              >
+               <span class="ad-location-address">
+                {{ c.address }}
+                </span>
+
+                <i class="bi bi-box-arrow-up-right ad-location-ext"></i>
+              </a>
+
+              <!-- Address exists but coordinates are unavailable -->
+              <span
+                *ngIf="c.latitude == null || c.longitude == null"
+                class="ad-detail-block-value ad-location-no-map"
+              >
+               {{ c.address }}
+              </span>
+
+            </div>
+
+            <div class="ad-detail-block">
+              <span class="ad-detail-block-label"><i class="bi bi-person"></i> Citizen</span>
+              <span class="ad-detail-block-value">{{ c.citizenName || '—' }}</span>
+              <span class="ad-detail-block-sub">{{ c.citizenEmail || '—' }}</span>
+            </div>
+
+            <div class="ad-detail-block">
+              <span class="ad-detail-block-label"><i class="bi bi-shield-check"></i> Officer</span>
+              <span class="ad-detail-block-value" *ngIf="c.assignedOfficerEmail">
+                {{ c.assignedOfficerName || c.assignedOfficerEmail }}
+              </span>
+              <span class="ad-unassigned" *ngIf="!c.assignedOfficerEmail">
+                <i class="bi bi-exclamation-circle"></i> Unassigned
+             </span>
+              <span class="ad-detail-block-sub" *ngIf="c.assignedOfficerEmail">{{ c.assignedOfficerEmail }}</span>
+            </div>
+          </div>
+
+          <div class="ad-detail-section" *ngIf="c.resolutionComment">
+            <h4 class="ad-detail-section-title"><i class="bi bi-chat-square-text"></i> Resolution Note</h4>
+            <p class="ad-detail-desc">{{ c.resolutionComment }}</p>
+          </div>
+
+          <div class="ad-detail-section" *ngIf="c.attachmentName && !isImage(c.attachmentName)">
+            <h4 class="ad-detail-section-title"><i class="bi bi-paperclip"></i> Attachment</h4>
+            <a [href]="fileUrl + '/' + getFileNameFromPath(c.attachmentPath)" target="_blank" class="attachment-link">
+              <i class="bi bi-file-earmark"></i> {{ c.attachmentName }}
+            </a>
+          </div>
+
+          <div class="ad-detail-timeline">
+            <div class="ad-timeline-item">
+              <span class="ad-timeline-dot"></span>
+              <div>
+                <span class="ad-timeline-label">Created</span>
+                <span class="ad-timeline-value">{{ c.createdAt ? (c.createdAt | date:'medium') : '—' }}</span>
+              </div>
+            </div>
+            <div class="ad-timeline-item">
+              <span class="ad-timeline-dot"></span>
+              <div>
+                <span class="ad-timeline-label">Last Updated</span>
+                <span class="ad-timeline-value">{{ c.updatedAt ? (c.updatedAt | date:'medium') : '—' }}</span>
+              </div>
+            </div>
+            <div class="ad-timeline-item" *ngIf="c.resolvedAt">
+              <span class="ad-timeline-dot ad-timeline-dot--done"></span>
+              <div>
+                <span class="ad-timeline-label">Resolved</span>
+                <span class="ad-timeline-value">{{ c.resolvedAt | date:'medium' }}</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="ad-modal-footer">
+<!--          <button class="ad-btn-ghost"-->
+<!--                  (click)="setView('complaints'); onSelectAssignComplaint(c.id!); onSelectUpdateComplaint(c.id!); closeDetailModal()">-->
+<!--            <i class="bi bi-pencil"></i> Manage-->
+<!--          </button>-->
+          <button class="ad-btn" (click)="closeDetailModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
