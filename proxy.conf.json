@@ -1,0 +1,26 @@
+{
+  "/auth/**": { "target": "https://citysparsh-backend.onrender.com", "secure": false, "changeOrigin": true },
+  "/citizen/**": { "target": "https://citysparsh-backend.onrender.com", "secure": false, "changeOrigin": true },
+  "/officer/**": { "target": "https://citysparsh-backend.onrender.com", "secure": false, "changeOrigin": true },
+  "/admin/**": { "target": "https://citysparsh-backend.onrender.com", "secure": false, "changeOrigin": true },
+  "/files/**": {
+    "target": "https://citysparsh-backend.onrender.com",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/meta/**": {
+    "target": "https://citysparsh-backend.onrender.com",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/public/**": {
+    "target": "https://citysparsh-backend.onrender.com",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/wards/**": {
+    "target": "https://citysparsh-backend.onrender.com",
+    "secure": false,
+    "changeOrigin": true
+  }
+}
