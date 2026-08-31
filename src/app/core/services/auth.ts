@@ -3,17 +3,19 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
+  private baseUrl = environment.apiUrl;
   private tokenKey = 'cs_token';
   private username = 'username';
 
   constructor(private http: HttpClient, private router: Router) {}
 
   login(data: { email: string; password: string }) {
-    return this.http.post<any>('/auth/login', data).pipe(
+    return this.http.post<any>(`${this.baseUrl}/auth/login`, data).pipe(
       tap(res => {
         localStorage.setItem(this.tokenKey, res.token);
         localStorage.setItem(this.username, res.name);
@@ -22,7 +24,7 @@ export class AuthService {
   }
 
   register(data: any) {
-    return this.http.post('/auth/register', data);
+    return this.http.post(`${this.baseUrl}/auth/register`, data);
   }
 
   logout() {
@@ -100,11 +102,11 @@ isLoggedIn(): boolean {
   }
 
  forgotPassword(email: string): Observable<any> {
-   return this.http.post('/auth/forgot-password', { email });
+   return this.http.post(`${this.baseUrl}/auth/forgot-password`, { email });
  }
 
  resetPassword(token: string, newPassword: string): Observable<any> {
-   return this.http.post('/auth/reset-password', { token, newPassword });
+   return this.http.post(`${this.baseUrl}/auth/reset-password`, { token, newPassword });
  }
 
 }
