@@ -149,8 +149,7 @@
 
             <!-- Attachment / Image -->
             <div class="complaint-card-img" *ngIf="c.attachmentName">
-              <img
-                [src]="fileUrl + '/' + getFileNameFromPath(c.attachmentPath)"
+              <img [src]="c.attachmentPath"
                 [alt]="c.attachmentName"
                 (error)="onImgError($event)"
               />
