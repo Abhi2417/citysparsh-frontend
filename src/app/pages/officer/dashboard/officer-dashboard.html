@@ -145,7 +145,7 @@
               <div *ngFor="let c of recent" class="od-complaint-card" (click)="viewComplaint(c)">
 
                 <div class="od-complaint-card-img" *ngIf="c.attachmentName">
-                  <img [src]="fileUrl + '/' + getFileNameFromPath(c.attachmentPath)"
+                  <img [src]="c.attachmentPath"
                        [alt]="c.attachmentName" (error)="onImgError($event)" />
                 </div>
                 <div class="od-complaint-card-img od-complaint-card-img--placeholder" *ngIf="!c.attachmentName">
@@ -448,7 +448,7 @@
 
             <!-- Image if present -->
             <div class="od-detail-img-wrap" *ngIf="c.attachmentName && isImage(c.attachmentName)">
-              <img [src]="fileUrl + '/' + getFileNameFromPath(c.attachmentPath)"
+              <img [src]="c.attachmentPath"
                    [alt]="c.attachmentName" (error)="onImgError($event)" />
             </div>
 

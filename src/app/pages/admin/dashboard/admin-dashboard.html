@@ -144,7 +144,7 @@ activeView === 'officers' ? 'All Officers' : 'Create Officer' }}
 
               <!-- Attachment image if present -->
               <div class="ad-complaint-card-img" *ngIf="c.attachmentName && isImage(c.attachmentName)">
-                <img [src]="fileUrl + '/' + getFileNameFromPath(c.attachmentPath)"
+                <img [src]="c.attachmentPath"
                      [alt]="c.attachmentName"
                      (error)="onImgError($event)" />
               </div>
@@ -496,7 +496,7 @@ activeView === 'officers' ? 'All Officers' : 'Create Officer' }}
                 <td>
                   <!-- Attachment link -->
                   <a *ngIf="c.attachmentName"
-                     [href]="fileUrl + '/' + getFileNameFromPath(c.attachmentPath)"
+                     [href]="c.attachmentPath" target="_blank"
                      target="_blank"
                      class="attachment-link"
                      (click)="$event.stopPropagation()">
@@ -1076,7 +1076,7 @@ activeView === 'officers' ? 'All Officers' : 'Create Officer' }}
 
         <!-- Attachment image preview -->
         <div class="ad-modal-attachment" *ngIf="c.attachmentName && isImage(c.attachmentName)">
-          <img [src]="fileUrl + '/' + getFileNameFromPath(c.attachmentPath)"
+          <img [src]="c.attachmentPath"
                [alt]="c.attachmentName" (error)="onImgError($event)">
         </div>
 

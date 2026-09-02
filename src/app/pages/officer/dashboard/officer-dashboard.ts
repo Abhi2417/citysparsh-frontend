@@ -242,7 +242,7 @@ export class OfficerDashboardComponent implements OnInit {
         if (idx !== -1) this.complaints[idx] = updated;
         this.toast.success('Complaint updated successfully.');
         this.saving = false;
-        this.cdr.detectChanges();
+        this.loadComplaints();
       },
       error: () => {
         this.toast.error('Failed to update complaint.');

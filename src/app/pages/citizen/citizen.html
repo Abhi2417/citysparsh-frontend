@@ -372,7 +372,7 @@
               <td>
                 <!-- Attachment link -->
                 <a *ngIf="c.attachmentName"
-                   [href]="fileUrl + '/' + getFileNameFromPath(c.attachmentPath)"
+                   [href]="c.attachmentPath" target="_blank"
                    target="_blank"
                    class="attachment-link"
                    (click)="$event.stopPropagation()">
