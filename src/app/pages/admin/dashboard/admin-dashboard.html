@@ -497,7 +497,6 @@ activeView === 'officers' ? 'All Officers' : 'Create Officer' }}
                   <!-- Attachment link -->
                   <a *ngIf="c.attachmentName"
                      [href]="c.attachmentPath" target="_blank"
-                     target="_blank"
                      class="attachment-link"
                      (click)="$event.stopPropagation()">
                     <i class="bi bi-paperclip"></i> {{ c.attachmentName }}

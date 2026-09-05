@@ -67,6 +67,10 @@ export class OfficerDashboardComponent implements OnInit {
 
   sidebarOpen = false;
 
+  // update pop up
+  showUpdateModal    = false;
+  updatingComplaint: Complaint | null = null;
+
   constructor(
     public  auth:  AuthService,
     private svc:   ComplaintService,
@@ -126,6 +130,20 @@ export class OfficerDashboardComponent implements OnInit {
      this.showDetailModal = false;
      this.selectedComplaint = null;
     }
+
+   openUpdateModal(c: Complaint): void {
+     this.updatingComplaint = c;
+     this.showUpdateModal   = true;
+     this.selectedId        = c.id ?? null;
+     this.updateStatus      = c.status      ?? 'PENDING';
+     this.updateComment     = c.resolutionComment ?? '';
+     this.cdr.detectChanges();
+   }
+
+   closeUpdateModal(): void {
+     this.showUpdateModal   = false;
+     this.updatingComplaint = null;
+   }
 
   getFileNameFromPath(attachmentPath: string | undefined | null): string {
       if (!attachmentPath) return '';
@@ -231,6 +249,7 @@ export class OfficerDashboardComponent implements OnInit {
     }
 
     this.saving = true;
+    this.cdr.detectChanges();
     const dto = {
       status:            this.updateStatus,
       resolutionComment: this.updateComment,
@@ -238,10 +257,15 @@ export class OfficerDashboardComponent implements OnInit {
 
     this.svc.updateOfficerComplaint(this.selectedId, dto).subscribe({
       next: (updated: any) => {
-        const idx = this.complaints.findIndex(c => c.id === this.selectedId);
-        if (idx !== -1) this.complaints[idx] = updated;
+         const idx = this.complaints.findIndex(c => c.id === this.selectedId);
+              if (idx !== -1) {
+                this.complaints[idx] = updated;
+                this.complaints = [...this.complaints];
+              }
         this.toast.success('Complaint updated successfully.');
         this.saving = false;
+        this.cdr.detectChanges();
+        this.closeUpdateModal();
         this.loadComplaints();
       },
       error: () => {

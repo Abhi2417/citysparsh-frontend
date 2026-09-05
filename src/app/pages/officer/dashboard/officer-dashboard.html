@@ -119,7 +119,7 @@
         </div>
 
         <!-- Dashboard grid -->
-        <div class="od-grid">
+        <div class="od-grid-full">
 
           <!-- Recent cases -->
           <div class="od-card">
@@ -171,51 +171,94 @@
                     </span>
                   </div>
                   <div class="od-complaint-card-footer">
-                    <span>View complaint</span>
-                    <i class="bi bi-arrow-right"></i>
+                    <span (click)="viewComplaint(c); $event.stopPropagation()">View complaint</span>
+                    <div style="display:flex;gap:8px;align-items:center">
+                      <button class="od-quick-update-btn"
+                              (click)="openUpdateModal(c); $event.stopPropagation()">
+                        <i class="bi bi-pencil-fill"></i> Update
+                      </button>
+                      <i class="bi bi-arrow-right" (click)="viewComplaint(c)"></i>
+                    </div>
                   </div>
                 </div>
 
               </div>
             </div>
           </div>
+          <!-- ════════ QUICK UPDATE MODAL ════════ -->
+          <div class="ad-modal-backdrop" *ngIf="showUpdateModal" (click)="closeUpdateModal()">
+            <div class="od-update-modal" (click)="$event.stopPropagation()">
 
-          <!-- Quick update -->
-          <div class="od-card">
-            <div class="od-card-head">
-              <h3 class="od-card-title">Quick Update</h3>
-            </div>
-            <div class="od-update-form">
-              <div class="od-field">
-                <label class="od-field-label">Select Complaint</label>
-                <select class="od-select" [ngModel]="selectedId"
-                        (ngModelChange)="onSelectComplaint($event)" name="selectedComplaint">
-                  <option [value]="null" disabled>Choose a case…</option>
-                  <option *ngFor="let c of complaints" [value]="c.id">
-                    #{{ c.id }} — {{ c.title }}
-                  </option>
-                </select>
+              <!-- Header -->
+              <div class="od-update-modal-header">
+                <div class="od-update-modal-title-row">
+                  <div class="od-update-modal-icon">
+                    <i class="bi bi-floppy-fill"></i>
+                  </div>
+                  <div>
+                    <h3 class="od-update-modal-title">Quick Update</h3>
+                    <p class="od-update-modal-sub">
+                      #{{ updatingComplaint?.id }} — {{ updatingComplaint?.title }}
+                    </p>
+                  </div>
+                </div>
+                <button class="od-update-modal-close" (click)="closeUpdateModal()">
+                  <i class="bi bi-x-lg"></i>
+                </button>
               </div>
-              <div class="od-field">
-                <label class="od-field-label">Update Status</label>
-                <select class="od-select" [(ngModel)]="updateStatus" name="updateStatus">
-                  <option *ngFor="let s of statusOptions" [value]="s">{{ formatStatus(s) }}</option>
-                </select>
+
+              <!-- Info strip -->
+              <div class="od-update-modal-info">
+                <span class="od-badge" [ngClass]="getStatusClass(updatingComplaint?.status)">
+                 {{ formatStatus(updatingComplaint?.status) }}
+                </span>
+                <span class="od-badge" [ngClass]="getPriorityClass(updatingComplaint?.priority)">
+                  {{ updatingComplaint?.priority }}
+                </span>
+                <span class="od-update-citizen">
+                 <i class="bi bi-person"></i>
+                  {{ updatingComplaint?.citizenName || updatingComplaint?.citizenEmail || '—' }}
+                </span>
               </div>
-              <div class="od-field">
-                <label class="od-field-label">Resolution Note</label>
-                <textarea class="od-textarea" [(ngModel)]="updateComment"
-                          name="updateComment" rows="4"
-                          placeholder="Add resolution comments or notes…"></textarea>
+
+              <!-- Body -->
+              <div class="od-update-modal-body">
+
+                <div class="od-field">
+                  <label class="od-field-label">Update Status</label>
+                  <select class="od-select" [(ngModel)]="updateStatus" name="updateStatusModal">
+                    <option *ngFor="let s of statusOptions" [value]="s">
+                      {{ formatStatus(s) }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="od-field">
+                  <label class="od-field-label">Resolution Note</label>
+                  <textarea class="od-textarea" [(ngModel)]="updateComment"
+                            name="updateCommentModal" rows="4"
+                            placeholder="Add resolution comments or notes…"></textarea>
+                </div>
+
               </div>
-              <button class="od-update-btn" (click)="saveUpdate()" [disabled]="saving">
-                <span *ngIf="saving" class="spinner-border spinner-border-sm"></span>
-                <ng-container *ngIf="!saving"><i class="bi bi-floppy-fill"></i> Save Update</ng-container>
-                <ng-container *ngIf="saving">Saving…</ng-container>
-              </button>
+
+              <!-- Footer -->
+              <div class="od-update-modal-footer">
+                <button class="od-update-modal-cancel" (click)="closeUpdateModal()">
+                  Cancel
+                </button>
+                <button class="od-update-btn od-update-modal-submit"
+                        (click)="saveUpdate()" [disabled]="saving">
+                  <span *ngIf="saving" class="spinner-border spinner-border-sm"></span>
+                  <ng-container *ngIf="!saving">
+                    <i class="bi bi-floppy-fill"></i> Save Update
+                  </ng-container>
+                  <ng-container *ngIf="saving">Saving…</ng-container>
+                </button>
+              </div>
+
             </div>
           </div>
-
         </div>
       </ng-container>
 
@@ -340,7 +383,6 @@
                 <th>Citizen</th>
                 <th>Created</th>
                 <th>Attachment</th>
-                <th></th>
               </tr>
               </thead>
               <tbody>
@@ -410,15 +452,13 @@
 
                 <td>
                   <a *ngIf="c.attachmentName"
-                     [href]="fileUrl + '/' + getFileNameFromPath(c.attachmentPath)"
+                     [href]="c.attachmentPath"
                      target="_blank" class="od-attachment-link"
                      (click)="$event.stopPropagation()">
                     <i class="bi bi-paperclip"></i> {{ c.attachmentName }}
                   </a>
                   <span *ngIf="!c.attachmentName" class="od-muted">—</span>
                 </td>
-
-                <td><i class="bi bi-chevron-right od-chevron"></i></td>
 
               </tr>
               </tbody>
@@ -522,7 +562,7 @@
               </div>
               <div class="od-detail-item" *ngIf="c.attachmentName">
                 <span class="od-detail-label"><i class="bi bi-paperclip"></i> Attachment</span>
-                <a [href]="fileUrl + '/' + getFileNameFromPath(c.attachmentPath)"
+                <a [href]="c.attachmentPath"
                    target="_blank" class="od-attachment-link">
                   {{ c.attachmentName }}
                 </a>
